@@ -1,0 +1,3 @@
+van.fs
+*.o
+build/*
