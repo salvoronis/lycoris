@@ -18,7 +18,7 @@ $(SUBDIRS):
 mountfs:
 	sudo mount -t reiserfs -o acl $(FILEFS) $(MOUNTDIR)
 
-core_prt: ./lycoris/core/src/main.c
+core_prt: ./lycoris/core/src/list.c
 	$(CC) -o ./lycoris/core/obj/$@.o -c $^
 
 app_prt: ./lycoris/app/src/main.c
