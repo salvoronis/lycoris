@@ -14,11 +14,11 @@ void list_devises() {
 		perror("Can not open /sys/block.");
 		exit(1);
 	}
-	puts("list of devices:");
+	puts("list of devices:\n.");
 	while ( (entry = readdir(devices)) != NULL ) {
 		if (strcmp(entry->d_name,".") == 0 || strcmp(entry->d_name,"..") == 0)
 			continue;
-		printf("\t->%s\n", entry->d_name);
+		printf("├── %s\n", entry->d_name);
 
 		partitions_list(entry->d_name);
 	}
@@ -34,13 +34,12 @@ void partitions_list(char * device_name) {
 	}
 	while ( (entry = readdir(partition_dir)) != NULL ) {
 		if (strstr(entry->d_name, device_name) != NULL) {
-			printf("\t\t-->%s\n", entry->d_name);
+			printf("│   ├── %s\n", entry->d_name);
 		}
 	}
 	closedir(partition_dir);
 }
 
-//TODO use realloc
 char * concat(char *s1, char *s2) {
 	char *result = malloc(strlen(s1) + strlen(s2) + 1);
 	strcpy(result, s1);

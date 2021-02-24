@@ -4,7 +4,7 @@ SUBDIRS = lycoris/app lycoris/core lycoris/app/obj lycoris/app/inc lycoris/app/s
 CC = gcc
 
 all: core_prt app_prt
-	gcc -o build/lycoris lycoris/core/obj/core_prt.o lycoris/app/obj/app_prt.o
+	gcc -o build/lycoris lycoris/core/obj/*.o lycoris/app/obj/app_prt.o
 
 subdirs: $(SUBDIRS)
 
@@ -18,8 +18,13 @@ $(SUBDIRS):
 mountfs:
 	sudo mount -t reiserfs -o acl $(FILEFS) $(MOUNTDIR)
 
-core_prt: ./lycoris/core/src/list.c
-	$(CC) -o ./lycoris/core/obj/$@.o -c $^
+core_prt: list.o reiser.o
+
+list.o: ./lycoris/core/src/list.c
+	$(CC) -o ./lycoris/core/obj/$@ -c $^
+
+reiser.o: ./lycoris/core/src/reiser.c
+	$(CC) -o ./lycoris/core/obj/$@ -c $^
 
 app_prt: ./lycoris/app/src/main.c
 	$(CC) -o ./lycoris/app/obj/$@.o -c $^

@@ -3,6 +3,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include "../../core/inc/functions.h"
+#include "../../core/inc/reiser.h"
 
 static void disassembly_args(int, char**);
 static void display_usage(void);
@@ -12,10 +13,11 @@ int main(int argc, char * argv[]) {
 }
 
 void disassembly_args(int argc, char * argv[]) {
-	const char * shortFlags = "lh";
+	const char * shortFlags = "lhd:";
 	const struct option longFlags[] = {
 		{"list", no_argument, NULL, 'l'},
-		{"help", no_argument, NULL, 'h'}
+		{"help", no_argument, NULL, 'h'},
+		{"device", required_argument, NULL, 'd'}
 	};
 	int32_t rez;
 	int32_t longid;
@@ -26,6 +28,13 @@ void disassembly_args(int argc, char * argv[]) {
 			break;
 		case 'h':
 			display_usage();
+			break;
+		case 'd':
+			if (check_fs(optarg) == 1){
+				puts("OK");
+			} else {
+				puts("Not reiser");
+			}
 			break;
 	}
 	}
@@ -41,7 +50,7 @@ struct help {
 void display_usage() {
 	struct help help_list[] = {
 		{0, 'l', "list", "shows list of devices and partitions."},
-		{0, 'h', "help", "show this message."}
+		{0, 'h', "help", "show this message."},
 	};
 	int16_t len = sizeof(help_list)/sizeof(help_list[0]);
 	for (int16_t i; i < len; i++) {
