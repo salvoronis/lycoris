@@ -13,11 +13,12 @@ int main(int argc, char * argv[]) {
 }
 
 void disassembly_args(int argc, char * argv[]) {
-	const char * shortFlags = "lhd:";
+	const char * shortFlags = "lhd:m:";
 	const struct option longFlags[] = {
 		{"list", no_argument, NULL, 'l'},
 		{"help", no_argument, NULL, 'h'},
-		{"device", required_argument, NULL, 'd'}
+		{"device", required_argument, NULL, 'd'},
+		{"meta", required_argument, NULL, 'm'},
 	};
 	int32_t rez;
 	int32_t longid;
@@ -30,11 +31,16 @@ void disassembly_args(int argc, char * argv[]) {
 			display_usage();
 			break;
 		case 'd':
-			if (check_fs(optarg) == 1){
+			read_meta(optarg);
+			if (check_fs() == 1){
 				puts("OK");
 			} else {
 				puts("Not reiser");
 			}
+			break;
+		case 'm':
+			read_meta(optarg);
+			print_meta();
 			break;
 	}
 	}

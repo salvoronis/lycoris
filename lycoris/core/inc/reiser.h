@@ -30,5 +30,7 @@ struct __attribute__((packed)) superblock {
 	int16_t reserved;
 	int32_t inode_generation;
 };
-int check_fs(char * path_to_fs);
+int check_fs();
+void read_meta(char * path_to_fs);
+void print_meta(void);
 #endif
