@@ -1,6 +1,6 @@
 FILEFS = van.fs
 MOUNTDIR = /mnt/spo
-SUBDIRS = lycoris/app lycoris/core lycoris/app/obj lycoris/app/inc lycoris/app/src lycoris/core/obj core/inc lycoris/core/src
+SUBDIRS = lycoris/app lycoris/core lycoris/app/obj lycoris/app/inc lycoris/app/src lycoris/core/obj core/inc lycoris/core/src build
 CC = gcc
 
 all: core_prt app_prt
@@ -16,7 +16,7 @@ $(SUBDIRS):
 	mkdir $@
 
 mountfs:
-	sudo mount -t reiserfs -o acl $(FILEFS) $(MOUNTDIR)
+	sudo mount -t reiserfs -o loop $(FILEFS) $(MOUNTDIR)
 
 core_prt: list.o reiser.o
 
@@ -28,3 +28,8 @@ reiser.o: ./lycoris/core/src/reiser.c
 
 app_prt: ./lycoris/app/src/main.c
 	$(CC) -o ./lycoris/app/obj/$@.o -c $^
+
+create_fs: $(FILEFS)
+	touch $(FILEFS)
+	sudo dd if=/dev/zero of=$(FILEFS) bs=1M count=64
+	make mountfs

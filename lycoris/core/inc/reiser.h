@@ -30,6 +30,14 @@ struct __attribute__((packed)) superblock {
 	int16_t reserved;
 	int32_t inode_generation;
 };
+struct __attribute__((packed)) block_header {
+	int16_t level;
+	int16_t number_of_items;
+	int16_t free_space;
+	int16_t reserved;
+	int64_t right_key;
+	int64_t right_key_cont;
+};
 int check_fs();
 void read_meta(char * path_to_fs);
 void print_meta(void);

@@ -5,6 +5,8 @@
 #include "../../core/inc/functions.h"
 #include "../../core/inc/reiser.h"
 
+#define OPTIONS_COUNT 2
+
 static void disassembly_args(int, char**);
 static void display_usage(void);
 
@@ -58,8 +60,7 @@ void display_usage() {
 		{0, 'l', "list", "shows list of devices and partitions."},
 		{0, 'h', "help", "show this message."},
 	};
-	int16_t len = sizeof(help_list)/sizeof(help_list[0]);
-	for (int16_t i; i < len; i++) {
+	for (int16_t i; i < OPTIONS_COUNT; i++) {
 		printf("%s:\n\trequired: %d\n\tshort name: %c\n\tlong name: %s\n\tdescription: %s\n",
 				help_list[i].longF,
 				help_list[i].require,

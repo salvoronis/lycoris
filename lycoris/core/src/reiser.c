@@ -4,14 +4,24 @@
 #include <string.h>
 
 #define SUPERBLOCK_START 0x10000
+#define block_addr(block_num, block_size) (block_num * block_size)
 
 struct superblock * meta;
+FILE * fs;
 
 void read_meta(char *path_to_fs) {
-	FILE * fs = fopen(path_to_fs, "rb");
+	fs = fopen(path_to_fs, "rb");
 	meta = malloc(sizeof(struct superblock));
-	fseek(fs, SUPERBLOCK_START, SEEK_CUR);
+	fseek(fs, SUPERBLOCK_START, SEEK_SET);
 	fread(meta, sizeof(struct superblock), 1, fs);
+}
+
+void print_root_block(){
+	unsigned int root = block_addr(meta->root_block, meta->blocksize);
+	struct block_header * data = malloc(sizeof(struct block_header));
+	fseek(fs, root, SEEK_SET);
+	fread(data, sizeof(struct block_header), 1, fs);
+	printf("->%X, %X, %X, %X, %X, %X\n",data->level, data->number_of_items, data->free_space, data->reserved, data->right_key, data->right_key_cont);
 }
 
 int check_fs() {
@@ -69,4 +79,5 @@ void print_meta() {
 		meta->reserved,
 		meta->inode_generation
 	);
+	print_root_block();
 }

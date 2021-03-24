@@ -1,3 +1,4 @@
 van.fs
 *.o
 build/*
+*.txt
