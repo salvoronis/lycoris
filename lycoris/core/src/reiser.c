@@ -21,7 +21,37 @@ void print_root_block(){
 	struct block_header * data = malloc(sizeof(struct block_header));
 	fseek(fs, root, SEEK_SET);
 	fread(data, sizeof(struct block_header), 1, fs);
-	printf("->%X, %X, %X, %X, %X, %X\n",data->level, data->number_of_items, data->free_space, data->reserved, data->right_key, data->right_key_cont);
+	printf(
+		"number of items -> %d\n"
+		"level -> %d\n"
+		"free space -> %d\n",
+		data->number_of_items,
+		data->level,
+		data->free_space
+		);
+
+	struct key * keys = malloc(sizeof(struct key) * (data->number_of_items + 1));
+	fread(keys, sizeof(struct key), data->number_of_items + 1, fs);
+	for (int i = 0; i < data->number_of_items + 1; i++) {
+		printf(
+			"-->block num: %d\n"
+			"-->size: %d\n"
+			"-->reserved: %d\n\n",
+			keys[i].block_number,
+			keys[i].size,
+			keys[i].reserved
+			);
+	}
+	struct partition * prts = malloc(sizeof(struct partition) * (data->number_of_items + 2));
+	fread(prts, sizeof(struct partition), data->number_of_items+2, fs);
+	for (int i = 0; i < data->number_of_items + 2; i++) {
+		printf(
+			"1 = %d\t"
+			"2 = %d\n",
+			prts[i].prt1,
+			prts[i].prt2
+			);
+	}
 }
 
 int check_fs() {

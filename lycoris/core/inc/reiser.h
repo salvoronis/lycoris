@@ -35,8 +35,23 @@ struct __attribute__((packed)) block_header {
 	int16_t number_of_items;
 	int16_t free_space;
 	int16_t reserved;
-	int64_t right_key;
-	int64_t right_key_cont;
+	int32_t right_key[4]; // strange key vith dir_id, obj_id, offset and type
+};
+struct __attribute__((packed)) key {
+	int32_t block_number;
+	int16_t size;
+	int16_t reserved;
+};
+struct __attribute__((packed)) partition {
+	int16_t prt1;
+	int16_t prt2;
+};
+struct __attribute__((packed)) item_header {
+	int32_t key[4];
+	int16_t count;
+	int16_t length;
+	int16_t location;
+	int16_t version;
 };
 int check_fs();
 void read_meta(char * path_to_fs);
