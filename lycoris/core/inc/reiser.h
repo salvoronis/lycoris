@@ -39,12 +39,15 @@ struct __attribute__((packed)) block_header {
 };
 struct __attribute__((packed)) key {
 	int32_t block_number;
-	int16_t size;
-	int16_t reserved;
+	int32_t size;
+	int32_t reserved;
+	int32_t type; //this part is missing in the fucking documentation, but it in use in hex.
 };
 struct __attribute__((packed)) partition {
 	int16_t prt1;
+	int16_t shit; //this part is missing too. fuck this fs
 	int16_t prt2;
+	int16_t junk; //this is missing too, oh I'm so fucking love to read hex.
 };
 struct __attribute__((packed)) item_header {
 	int32_t key[4];
@@ -52,6 +55,31 @@ struct __attribute__((packed)) item_header {
 	int16_t length;
 	int16_t location;
 	int16_t version;
+};
+struct __attribute__((packed)) stat_item_v1 {
+	int16_t mode;
+	int16_t num_links;
+	int16_t UID;
+	int16_t GID;
+	int32_t size;
+	int32_t atime;
+	int32_t mtime;
+	int32_t ctime;
+	int32_t rdev_blocks;
+	int32_t first_dir_byte;
+};
+struct __attribute__((packed)) stat_item_v2 {
+	int16_t mode;
+	int16_t reserved;
+	int32_t num_links;
+	int64_t size;
+	int32_t UID;
+	int32_t GID;
+	int32_t atime;
+	int32_t mtime;
+	int32_t ctime;
+	int32_t blocks;
+	int32_t rdev_gen_first;
 };
 int check_fs();
 void read_meta(char * path_to_fs);
