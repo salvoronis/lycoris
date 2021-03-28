@@ -1,4 +1,5 @@
 #include "../inc/reiser.h"
+#include "../inc/linked_list.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -129,54 +130,18 @@ void print_root_leaf() {
 	struct item_header *headers = malloc(sizeof(struct item_header)*(data->number_of_items+1));
 	fread(headers, sizeof(struct item_header), data->number_of_items + 1, fs);
 
-
-	//fseek(fs, block_addr(meta->root_block+1, meta->blocksize), SEEK_SET);
-	unsigned int items_size = 0;
-
-
-	for (int i = 0; i < data->number_of_items + 1; i++) {
-		headers[i].version == 0 ?
-			printf("-->fucking_type: %d\n",get_keyv1_type(headers[i].key[3])) :
-			printf("-->fucking_type: %d\n", get_keyv2_type(headers[i].key[3]));
-		printf(
-			"-->count: %X\n"
-			"-->length: %u\n"
-			"-->location: %u\n"
-			"-->version: %u\n"
-			"-->key: 1:%X 2:%X 3:%X 4:%X\n"
-			"-->is_1_f: %u\n\n",
-			headers[i].count,
-			headers[i].length,
-			headers[i].location,
-			headers[i].version,
-			headers[i].key[0],
-			headers[i].key[1],
-			headers[i].key[2],
-			headers[i].key[3],
-			headers[i].version == 0? 1 : 2
-		);
-		if (headers[i].version == 0) {
-			items_size += sizeof(struct stat_item_v1);
-		} else
-			items_size += sizeof(struct stat_item_v2);
-	}
-	unsigned int offset = block_addr(meta->root_block, meta->blocksize) + item_headers_off(data->number_of_items) + data->free_space;
-	printf("oh fuck %X\n", offset);
+	unsigned int offset = block_addr(meta->root_block, meta->blocksize) +
+		item_headers_off(data->number_of_items) + data->free_space;
 	fseek(fs, offset, SEEK_SET);
-	printf("%d\n", items_size);
-	char * items = malloc(items_size * sizeof(char));
-	fread(items, items_size, 1, fs);
-	struct stat_item_v2 * test = (struct stat_item_v2 *) items;
-	printf(
-		"--->mode: %X\n"
-		"--->reserved: %X\n"
-		"--->num lin: %X\n"
-		"--->size: %X\n",
-		test->mode,
-		test->reserved,
-		test->num_links,
-		test->size
-	);
+	void * item = malloc(44); //44 is a item max size
+	struct LinkedList *head = NULL;
+
+	for (int i = data->number_of_items; i >= 0; i--) {
+		fread(item, headers[i].version == 0? 32:44, 1, fs);
+		push(&head, headers[i], item);
+	}
+	free(item);
+	LinkedList_print(head);
 }
 
 int check_fs() {

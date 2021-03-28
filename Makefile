@@ -18,12 +18,15 @@ $(SUBDIRS):
 mountfs:
 	sudo mount -t reiserfs -o loop $(FILEFS) $(MOUNTDIR)
 
-core_prt: list.o reiser.o
+core_prt: list.o reiser.o linked_list.o
 
 list.o: ./lycoris/core/src/list.c
 	$(CC) -o ./lycoris/core/obj/$@ -c $^
 
 reiser.o: ./lycoris/core/src/reiser.c
+	$(CC) -o ./lycoris/core/obj/$@ -c $^
+
+linked_list.o: ./lycoris/core/src/linked_list.c
 	$(CC) -o ./lycoris/core/obj/$@ -c $^
 
 app_prt: ./lycoris/app/src/main.c
