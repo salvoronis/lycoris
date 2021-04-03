@@ -1,8 +1,11 @@
 #include "../inc/reiser.h"
 #include "../inc/linked_list.h"
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+//#define DEBUG
 
 #define SUPERBLOCK_START 0x10000
 #define S_IFSOCK 	0xC000 //socket
@@ -26,6 +29,19 @@ enum Type {
 	Any
 };
 
+enum Item_type {
+	ERR,
+	FIFO,
+	CHR,
+	DIR,
+	BLK,
+	REG,
+	LINK,
+	SOCK
+};
+
+char *Item_type_wrap[] = {"error","fifo","char dev","dir","blk","regular file","link","socket"};//TEST
+
 struct superblock * meta;
 FILE * fs;
 
@@ -40,7 +56,7 @@ void read_meta(char *path_to_fs) {
 	fread(meta, sizeof(struct superblock), 1, fs);
 }
 
-static int get_keyv1_type(int type) {
+static enum Type get_keyv1_type(int32_t type) {
 	switch (type) {
 		case 0x0:
 			return Stat;
@@ -56,10 +72,9 @@ static int get_keyv1_type(int type) {
 	}
 }
 
-static int get_keyv2_type(int type) {
+static enum Type get_keyv2_type(int32_t type) {
 	int mask = 0xF; //mask to get 4 bits
 	int value = type & mask;
-	printf("mask -> %d\n", value);
 	switch (value) {
 		case 0:
 			return Stat;
@@ -114,34 +129,113 @@ void print_root_block(){
 	}
 }
 
+static enum Item_type get_item_type(int16_t mode) {
+	uint16_t mask = 0xF000;
+	uint16_t value = mode & mask;
+	switch (value) {
+		case S_IFIFO:
+			return FIFO;
+		case S_IFCHR:
+			return CHR;
+		case S_IFDIR:
+			return DIR;
+		case S_IFBLK:
+			return BLK;
+		case S_IFREG:
+			return REG;
+		case S_IFLINK:
+			return LINK;
+		case S_IFSOCK:
+			return SOCK;
+		default:
+			return ERR;
+	}
+}
+
+void get_directories(struct LinkedList * node){
+	struct dir_header * dirs = malloc(node->header.count * sizeof(struct dir_header));
+	dirs = (struct dir_header*) node->item;
+	for (int i = 0; i < node->header.count; i++) {
+		#ifdef DEBUG
+		printf(
+			"--offset %u\n"
+			"--dir_id %u\n"
+			"--obj_id %u\n"
+			"--locati %u\n"
+			"--state  %u\n-------\n",
+			dirs[i].offset,
+			dirs[i].dir_id,
+			dirs[i].object_id,
+			dirs[i].location,
+			dirs[i].state
+		);
+		#endif
+		printf("%s\n-------------\n",(char*)(node->item+dirs[i].location));
+	}
+}
+
 void print_root_leaf() {
 	unsigned int root = block_addr(meta->root_block, meta->blocksize);
 	struct block_header * data = malloc(sizeof(struct block_header));
 	fseek(fs, root, SEEK_SET);
 	fread(data, sizeof(struct block_header), 1, fs);
+	#ifdef DEBUG
 	printf(
 		"number of items -> %d\n"
 		"level -> %d\n"
-		"free space -> %d\n",
+		"free space -> %d\n\n",
 		data->number_of_items,
 		data->level,
 		data->free_space
-		);
+	);
+	#endif
 	struct item_header *headers = malloc(sizeof(struct item_header)*(data->number_of_items+1));
 	fread(headers, sizeof(struct item_header), data->number_of_items + 1, fs);
 
-	unsigned int offset = block_addr(meta->root_block, meta->blocksize) +
-		item_headers_off(data->number_of_items) + data->free_space;
-	fseek(fs, offset, SEEK_SET);
-	void * item = malloc(44); //44 is a item max size
 	struct LinkedList *head = NULL;
 
-	for (int i = data->number_of_items; i >= 0; i--) {
-		fread(item, headers[i].version == 0? 32:44, 1, fs);
-		push(&head, headers[i], item);
+	for (int i = 0; i <= data->number_of_items; i++) {
+		void * item = malloc(headers[i].length);
+		fseek(fs, root+headers[i].location, SEEK_SET);
+		fread(
+			item,
+			headers[i].length,
+			1,
+			fs);
+		push(&head, headers[i], item, headers[i].length);
+		free(item);
 	}
-	free(item);
-	LinkedList_print(head);
+
+	struct LinkedList * tmp = head;
+	while (tmp != NULL) {
+		#ifdef DEBUG
+		printf(
+			"-key -> %X|%X|%X|%X\n"
+			"-count -> %X\n"
+			"-length -> %u\n"
+			"-location -> %u\n"
+			"-version -> %u\n",
+			tmp->header.key[0],tmp->header.key[1],
+			tmp->header.key[2],tmp->header.key[3],
+			tmp->header.count,
+			tmp->header.length,
+			tmp->header.location,
+			tmp->header.version
+		);
+		#endif
+		enum Type key_type;
+		if (tmp->header.version == 0) {
+			key_type = get_keyv1_type(tmp->header.key[3]);
+		} else
+			key_type = get_keyv2_type(tmp->header.key[3]);
+
+		if (key_type == Directory) {
+			get_directories(tmp);
+		}
+
+		puts("");
+		tmp = tmp->next;
+	}
 }
 
 int check_fs() {
