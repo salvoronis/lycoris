@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-//#define DEBUG
+#define DEBUG
 
 #define SUPERBLOCK_START 0x10000
 #define S_IFSOCK 	0xC000 //socket
@@ -239,10 +239,7 @@ void print_root_leaf() {
 }
 
 int check_fs() {
-	if (strcmp("ReIsEr2Fs", (char*)meta->magic_string) == 0) {
-		return 1;
-	}
-	return 0;
+	return strcmp("ReIsEr2Fs", (char*)meta->magic_string) == 0? 1:0;
 }
 
 static struct LinkedList * parseLeafNode(unsigned int block_addr){
@@ -332,7 +329,7 @@ void print_meta() {
 	print_root_leaf();
 }
 
-unsigned int get_dir(int32_t dir_id, struct item_wrapper ** items_in_dir) {
+unsigned int get_dir(int32_t dir_id, int32_t obj_id, struct item_wrapper ** items_in_dir) {
 	struct LinkedList * head = parseLeafNode(block_addr(meta->root_block,meta->blocksize));
 	unsigned int items_count = 0;
 	while (head != NULL) {
@@ -342,8 +339,10 @@ unsigned int get_dir(int32_t dir_id, struct item_wrapper ** items_in_dir) {
 		} else
 			key_type = get_keyv2_type(head->header.key[3]);
 
-		if (key_type == Directory && head->header.key[0] == dir_id) {
-			items_count += head->header.count;
+		if (key_type == Directory &&
+		head->header.key[0] == dir_id &&
+		head->header.key[1] == obj_id) {
+			items_count = head->header.count;
 			struct dir_header * dirs =
 				malloc(head->header.count * sizeof(struct dir_header));
 			dirs = (struct dir_header*) head->item;

@@ -13,6 +13,7 @@ static void disassembly_args(int, char**);
 static void display_usage(void);
 static void run_interactive(void);
 static void list_directory(struct item_wrapper*, unsigned int);
+static unsigned int change_dir(struct item_wrapper **, unsigned int *, char *, int32_t *, int32_t *);
 
 typedef enum {false, true} Bool;
 
@@ -22,21 +23,21 @@ int main(int argc, char * argv[]) {
 
 static void run_interactive(void) {
 	Bool stop_flag = false;
-	char command[50];
+	char cmd[100];
 	struct item_wrapper * current_dir = malloc(1);
-	unsigned int cur_dir_id = 1;
-	unsigned int inum = get_dir(cur_dir_id, &current_dir);
-	/*for (int i = 0; i < inum; i++) {
-		printf("item %d %s %u %u\n",
-			i,
-			current_dir[i].name,
-			current_dir[i].dir_id,
-			current_dir[i].obj_id
-		);
-	}*/
+	int32_t cur_dir_id = 1;
+	int32_t cur_obj_id = 2;
+	unsigned int inum = get_dir(cur_dir_id, cur_obj_id, &current_dir);
 	while (!stop_flag) {
 		printf("lycoris-> ");
-		scanf("%s", command);
+		fgets(cmd, sizeof(cmd), stdin);
+		for (int i = 0; i < sizeof(cmd); i++) {
+			if (cmd[i] == '\n'){
+				cmd[i] = '\0';
+				break;
+			}
+		}
+		char *command = strtok(cmd, " ");
 		if (strcmp(command, "exit") == 0 || strcmp(command, "q") == 0){
 			stop_flag = true;
 		} else if (strcmp(command, "pwd") == 0) {
@@ -44,7 +45,17 @@ static void run_interactive(void) {
 		} else if (strcmp(command, "ls") == 0) {
 			list_directory(current_dir, inum);
 		} else if (strcmp(command, "cd") == 0) {
-			puts("cd");
+			char * arg = strtok(NULL, " ");
+			if (arg == NULL) {
+				puts("missing argument");
+				continue;
+			}
+			if (!(change_dir(&current_dir,
+					&inum,
+					arg,
+					&cur_dir_id,
+					&cur_obj_id) == 0))
+				puts("change directory error");
 		} else if (strcmp(command, "cp") == 0) {
 			puts("cp");
 		} else if (strcmp(command, "print_file") == 0) {
@@ -53,6 +64,28 @@ static void run_interactive(void) {
 			puts("unknown command");
 		}
 	}
+}
+
+static unsigned int change_dir(
+		struct item_wrapper ** cur,
+		unsigned int * inum,
+		char * new_dir,
+		int32_t * dir_id,
+		int32_t * obj_id) {
+
+	//unsigned int new_dir_id = 0;
+	for (int i = 0; i < *inum; i++){
+		if (strcmp((*cur)[i].name, new_dir) == 0) {
+			*dir_id = (*cur)[i].dir_id;
+			*obj_id = (*cur)[i].obj_id;
+		}
+	}
+	if (*dir_id != 0) {
+		*inum = get_dir(*dir_id, *obj_id, cur);
+		//printf("inum %u\n", *inum);
+		return 0;
+	}
+	return 1;
 }
 
 static void list_directory(struct item_wrapper * items, unsigned int inum) {

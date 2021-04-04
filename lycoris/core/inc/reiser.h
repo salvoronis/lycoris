@@ -96,5 +96,5 @@ struct item_wrapper {
 int check_fs();
 void read_meta(char * path_to_fs);
 void print_meta(void);
-unsigned int get_dir(int32_t dir_id, struct item_wrapper **);
+unsigned int get_dir(int32_t dir_id, int32_t obj_id, struct item_wrapper **);
 #endif
