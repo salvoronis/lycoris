@@ -245,6 +245,41 @@ int check_fs() {
 	return 0;
 }
 
+static struct LinkedList * parseLeafNode(unsigned int block_addr){
+	struct block_header * data = malloc(sizeof(struct block_header));
+	fseek(fs, block_addr, SEEK_SET);
+	fread(data, sizeof(struct block_header), 1, fs);
+	#ifdef DEBUG
+	printf(
+		"number of items -> %d\n"
+		"level -> %d\n"
+		"free space -> %d\n\n",
+		data->number_of_items,
+		data->level,
+		data->free_space
+	);
+	#endif
+	struct item_header *headers =
+		malloc(sizeof(struct item_header)*(data->number_of_items+1));
+
+	fread(headers, sizeof(struct item_header), data->number_of_items + 1, fs);
+
+	struct LinkedList *head = NULL;
+
+	for (int i = 0; i <= data->number_of_items; i++) {
+		void * item = malloc(headers[i].length);
+		fseek(fs, block_addr+headers[i].location, SEEK_SET);
+		fread(
+			item,
+			headers[i].length,
+			1,
+			fs);
+		push(&head, headers[i], item, headers[i].length);
+		free(item);
+	}
+	return head;
+}
+
 void print_meta() {
 	printf(
 		"Meta data\n"
@@ -295,4 +330,33 @@ void print_meta() {
 	);
 	//print_root_block();
 	print_root_leaf();
+}
+
+unsigned int get_dir(int32_t dir_id, struct item_wrapper ** items_in_dir) {
+	struct LinkedList * head = parseLeafNode(block_addr(meta->root_block,meta->blocksize));
+	unsigned int items_count = 0;
+	while (head != NULL) {
+		enum Type key_type;
+		if (head->header.version == 0) {
+			key_type = get_keyv1_type(head->header.key[3]);
+		} else
+			key_type = get_keyv2_type(head->header.key[3]);
+
+		if (key_type == Directory && head->header.key[0] == dir_id) {
+			items_count += head->header.count;
+			struct dir_header * dirs =
+				malloc(head->header.count * sizeof(struct dir_header));
+			dirs = (struct dir_header*) head->item;
+			*items_in_dir = realloc(*items_in_dir, 
+					head->header.count*sizeof(struct item_wrapper));
+			for (int i = 0; i < head->header.count; i++) {
+				(*items_in_dir)[i].dir_id = dirs[i].dir_id;
+				(*items_in_dir)[i].obj_id = dirs[i].object_id;
+				(*items_in_dir)[i].name = (char*)(head->item+dirs[i].location);
+			}
+
+		}
+		head = head->next;
+	}
+	return items_count;
 }

@@ -81,21 +81,20 @@ struct __attribute__((packed)) stat_item_v2 {
 	int32_t blocks;
 	int32_t rdev_gen_first;
 };
-struct __attribute__((packed)) directory {
+struct __attribute__((packed)) dir_header {
 	int32_t offset;
-	int32_t dir_id;
-	int32_t object_id;
+	uint32_t dir_id;
+	uint32_t object_id;
 	int16_t location;
 	int16_t state;
 };
-struct __attribute__((packed)) dir_header {
-	int32_t offset;
-	int32_t dir_id;
-	int32_t object_id;
-	int16_t location;
-	int16_t state;
+struct item_wrapper {
+	uint32_t dir_id;
+	uint32_t obj_id;
+	char * name;
 };
 int check_fs();
 void read_meta(char * path_to_fs);
 void print_meta(void);
+unsigned int get_dir(int32_t dir_id, struct item_wrapper **);
 #endif
