@@ -1,6 +1,9 @@
 #ifndef REISER
 #define REISER
-#include <bits/stdint-intn.h>
+#define block_addr(block_num, block_size) (block_num * block_size)
+#define key_offset(n) (24 + n * 16)
+#define pointer_offset(n, k) (24 + k * 16 + n * 8)
+#define item_headers_off(n) (24*(n+1))
 #include <stdint.h>
 struct __attribute__((packed)) superblock {
 	int32_t block_count;

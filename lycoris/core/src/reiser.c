@@ -1,5 +1,6 @@
 #include "../inc/reiser.h"
 #include "../inc/linked_list.h"
+#include "../inc/util.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,47 +9,18 @@
 #define DEBUG
 
 #define SUPERBLOCK_START 0x10000
-#define S_IFSOCK 	0xC000 //socket
-#define S_IFLINK 	0xA000 //symbolic link
-#define S_IFREG 	0x8000 //regular file
-#define S_IFBLK 	0x6000 //block device
-#define S_IFDIR 	0x4000 //directory
-#define S_IFCHR 	0x2000 //character device
-#define S_IFIFO 	0x1000 //fifo
 
 #define block_addr(block_num, block_size) (block_num * block_size)
 #define key_offset(n) (24 + n * 16)
 #define pointer_offset(n, k) (24 + k * 16 + n * 8)
 #define item_headers_off(n) (24*(n+1))
 
-enum Type {
-	Stat,
-	Indirect,
-	Direct,
-	Directory,
-	Any
-};
-
-enum Item_type {
-	ERR,
-	FIFO,
-	CHR,
-	DIR,
-	BLK,
-	REG,
-	LINK,
-	SOCK
-};
-
-char *Item_type_wrap[] = {"error","fifo","char dev","dir","blk","regular file","link","socket"};//TEST
-
 struct superblock * meta;
 FILE * fs;
 
-static inline int is_key_format_1 (int keys_type) {
-	return ((keys_type == 0 || keys_type == 15) ? 1 : 0);
-}
-
+/**
+ * read and write meta data from superblock to global var 
+ * */
 void read_meta(char *path_to_fs) {
 	fs = fopen(path_to_fs, "rb");
 	meta = malloc(sizeof(struct superblock));
@@ -56,39 +28,9 @@ void read_meta(char *path_to_fs) {
 	fread(meta, sizeof(struct superblock), 1, fs);
 }
 
-static enum Type get_keyv1_type(int32_t type) {
-	switch (type) {
-		case 0x0:
-			return Stat;
-		case 0xfffffffe:
-			return Indirect;
-		case 0xffffffff:
-			return Direct;
-		case 500:
-			return Directory;
-		default:
-			return Any;
-
-	}
-}
-
-static enum Type get_keyv2_type(int32_t type) {
-	int mask = 0xF; //mask to get 4 bits
-	int value = type & mask;
-	switch (value) {
-		case 0:
-			return Stat;
-		case 1:
-			return Indirect;
-		case 2:
-			return Direct;
-		case 3:
-			return Directory;
-		default:
-			return Any;
-	}
-}
-
+/**
+ * MUST BE DELETED
+ * */
 void print_root_block(){
 	unsigned int root = block_addr(meta->root_block, meta->blocksize);
 	struct block_header * data = malloc(sizeof(struct block_header));
@@ -129,6 +71,9 @@ void print_root_block(){
 	}
 }
 
+/**
+ * wrapper function to get item type
+ * */
 static enum Item_type get_item_type(int16_t mode) {
 	uint16_t mask = 0xF000;
 	uint16_t value = mode & mask;
@@ -152,6 +97,9 @@ static enum Item_type get_item_type(int16_t mode) {
 	}
 }
 
+/**
+ * PRINT DIRS IN LEAF MUST BE DELETED
+ * */
 void get_directories(struct LinkedList * node){
 	struct dir_header * dirs = malloc(node->header.count * sizeof(struct dir_header));
 	dirs = (struct dir_header*) node->item;
@@ -174,6 +122,9 @@ void get_directories(struct LinkedList * node){
 	}
 }
 
+/**
+ * MUST BE DELETED
+ * */
 void print_root_leaf() {
 	unsigned int root = block_addr(meta->root_block, meta->blocksize);
 	struct block_header * data = malloc(sizeof(struct block_header));
@@ -238,15 +189,24 @@ void print_root_leaf() {
 	}
 }
 
+/**
+ * Compare magic field with expected value
+ * */
 int check_fs() {
 	return strcmp("ReIsEr2Fs", (char*)meta->magic_string) == 0? 1:0;
 }
 
-static struct LinkedList * parseLeafNode(unsigned int block_addr){
+/**
+ * function parseLeafNode receive block addres in fs
+ * read block header, items headers and items
+ * then create a linked list with two values: header and item(with data)
+ * return list's head
+ * */
+struct LinkedList * parseLeafNode(unsigned int block_addr){
 	struct block_header * data = malloc(sizeof(struct block_header));
 	fseek(fs, block_addr, SEEK_SET);
 	fread(data, sizeof(struct block_header), 1, fs);
-	#ifdef DEBUG
+	/*#ifdef DEBUG
 	printf(
 		"number of items -> %d\n"
 		"level -> %d\n"
@@ -255,7 +215,7 @@ static struct LinkedList * parseLeafNode(unsigned int block_addr){
 		data->level,
 		data->free_space
 	);
-	#endif
+	#endif*/
 	struct item_header *headers =
 		malloc(sizeof(struct item_header)*(data->number_of_items+1));
 
@@ -277,6 +237,9 @@ static struct LinkedList * parseLeafNode(unsigned int block_addr){
 	return head;
 }
 
+/**
+ * prints superblock's fields
+ * */
 void print_meta() {
 	printf(
 		"Meta data\n"
@@ -327,35 +290,4 @@ void print_meta() {
 	);
 	//print_root_block();
 	print_root_leaf();
-}
-
-unsigned int get_dir(int32_t dir_id, int32_t obj_id, struct item_wrapper ** items_in_dir) {
-	struct LinkedList * head = parseLeafNode(block_addr(meta->root_block,meta->blocksize));
-	unsigned int items_count = 0;
-	while (head != NULL) {
-		enum Type key_type;
-		if (head->header.version == 0) {
-			key_type = get_keyv1_type(head->header.key[3]);
-		} else
-			key_type = get_keyv2_type(head->header.key[3]);
-
-		if (key_type == Directory &&
-		head->header.key[0] == dir_id &&
-		head->header.key[1] == obj_id) {
-			items_count = head->header.count;
-			struct dir_header * dirs =
-				malloc(head->header.count * sizeof(struct dir_header));
-			dirs = (struct dir_header*) head->item;
-			*items_in_dir = realloc(*items_in_dir, 
-					head->header.count*sizeof(struct item_wrapper));
-			for (int i = 0; i < head->header.count; i++) {
-				(*items_in_dir)[i].dir_id = dirs[i].dir_id;
-				(*items_in_dir)[i].obj_id = dirs[i].object_id;
-				(*items_in_dir)[i].name = (char*)(head->item+dirs[i].location);
-			}
-
-		}
-		head = head->next;
-	}
-	return items_count;
 }

@@ -1,6 +1,6 @@
 #ifndef LINKED_LIST
-#include "reiser.h"
 #include <stdlib.h>
+#include "../inc/reiser.h"
 #define LINKED_LIST
 struct LinkedList {
 	struct item_header header;
