@@ -1,6 +1,6 @@
 #include "../inc/util.h"
 #include <stdint.h>
-
+#include <stdio.h>
 /**
  * function wrapper to get key type for 1v and 2v
  * */
@@ -20,9 +20,8 @@ enum Type get_keyv1_type(int32_t type) {
 	}
 }
 
-enum Type get_keyv2_type(int32_t type) {
-	int mask = 0xF; //mask to get 4 bits
-	int value = type & mask;
+enum Type get_keyv2_type(uint64_t off) {
+	uint8_t value = off >> 60;
 	switch (value) {
 		case 0:
 			return Stat;
@@ -35,6 +34,11 @@ enum Type get_keyv2_type(int32_t type) {
 		default:
 			return Any;
 	}
+}
+
+uint64_t get_keyv2_offset(uint64_t off) {
+	uint64_t mask = 0xfffffffffffffff; //mask to get 60 bit of offset
+	return off & mask;
 }
 
 /**

@@ -159,27 +159,36 @@ void print_root_leaf() {
 
 	struct LinkedList * tmp = head;
 	while (tmp != NULL) {
+		enum Type key_type;
+		if (tmp->header.version == 0) {
+			key_type = get_keyv1_type(tmp->header.key.u.k_offset_v1.type);
+		} else
+			key_type = get_keyv2_type(tmp->header.key.u.k_offset_v2.offset);
 		#ifdef DEBUG
+		uint32_t off;
+		uint32_t tp;
+		if (tmp->header.version == 0) {
+			off = tmp->header.key.u.k_offset_v1.offset;
+			tp = tmp->header.key.u.k_offset_v1.type;
+		} else {
+			off = get_keyv2_offset(tmp->header.key.u.k_offset_v2.offset);
+			tp = get_keyv2_type(tmp->header.key.u.k_offset_v2.offset);
+		}
 		printf(
 			"-key -> %X|%X|%X|%X\n"
 			"-count -> %X\n"
 			"-length -> %u\n"
 			"-location -> %u\n"
 			"-version -> %u\n",
-			tmp->header.key[0],tmp->header.key[1],
-			tmp->header.key[2],tmp->header.key[3],
+			tmp->header.key.dir_id,
+			tmp->header.key.obj_id,
+			off, tp,
 			tmp->header.count,
 			tmp->header.length,
 			tmp->header.location,
 			tmp->header.version
 		);
 		#endif
-		enum Type key_type;
-		if (tmp->header.version == 0) {
-			key_type = get_keyv1_type(tmp->header.key[3]);
-		} else
-			key_type = get_keyv2_type(tmp->header.key[3]);
-
 		if (key_type == Directory) {
 			get_directories(tmp);
 		}

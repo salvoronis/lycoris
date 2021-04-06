@@ -27,5 +27,6 @@ enum Item_type {
 	SOCK
 };
 enum Type get_keyv1_type(int32_t);
-enum Type get_keyv2_type(int32_t);
+enum Type get_keyv2_type(uint64_t);
+uint64_t get_keyv2_offset(uint64_t);
 #endif

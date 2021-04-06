@@ -33,12 +33,28 @@ struct __attribute__((packed)) superblock {
 	int16_t reserved;
 	int32_t inode_generation;
 };
+struct __attribute__((packed)) offset_v1 {
+	uint32_t offset;
+	uint32_t type;
+};
+struct __attribute__((packed)) offset_v2 {
+	uint64_t offset;
+};
+struct __attribute__((packed)) reiser_key {
+	uint32_t dir_id;
+	uint32_t obj_id;
+	union {
+		struct offset_v1 k_offset_v1;
+		struct offset_v2 k_offset_v2;
+	} __attribute__((packed)) u;
+};
 struct __attribute__((packed)) block_header {
 	int16_t level;
 	int16_t number_of_items;
 	int16_t free_space;
 	int16_t reserved;
-	int32_t right_key[4]; // strange key vith dir_id, obj_id, offset and type
+	//int32_t right_key[4];
+	struct reiser_key rkey;
 };
 struct __attribute__((packed)) key {
 	int32_t block_number;
@@ -53,7 +69,8 @@ struct __attribute__((packed)) partition {
 	int16_t junk; //this is missing too, oh I'm so fucking love to read hex.
 };
 struct __attribute__((packed)) item_header {
-	int32_t key[4];
+	//int32_t key[4];
+	struct reiser_key key;
 	int16_t count;
 	int16_t length;
 	int16_t location;

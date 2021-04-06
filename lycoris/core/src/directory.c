@@ -20,13 +20,13 @@ unsigned int get_dir(int32_t dir_id, int32_t obj_id, struct item_wrapper ** item
 	while (head != NULL) {
 		enum Type key_type;
 		if (head->header.version == 0) {
-			key_type = get_keyv1_type(head->header.key[3]);
+			key_type = get_keyv1_type(head->header.key.u.k_offset_v1.type);
 		} else
-			key_type = get_keyv2_type(head->header.key[3]);
+			key_type = get_keyv2_type(head->header.key.u.k_offset_v2.offset);
 
 		if (key_type == Directory &&
-		head->header.key[0] == dir_id &&
-		head->header.key[1] == obj_id) {
+		head->header.key.dir_id == dir_id &&
+		head->header.key.obj_id == obj_id) {
 			items_count = head->header.count;
 			struct dir_header * dirs =
 				malloc(head->header.count * sizeof(struct dir_header));
