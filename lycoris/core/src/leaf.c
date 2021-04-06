@@ -16,16 +16,6 @@ struct LinkedList * parseLeafNode(unsigned int block_addr){
 	struct block_header * data = malloc(sizeof(struct block_header));
 	fseek(fs, block_addr, SEEK_SET);
 	fread(data, sizeof(struct block_header), 1, fs);
-	/*#ifdef DEBUG
-	printf(
-		"number of items -> %d\n"
-		"level -> %d\n"
-		"free space -> %d\n\n",
-		data->number_of_items,
-		data->level,
-		data->free_space
-	);
-	#endif*/
 	struct item_header *headers =
 		malloc(sizeof(struct item_header)*(data->number_of_items+1));
 

@@ -7,6 +7,7 @@
 #include "../../core/inc/functions.h"
 #include "../../core/inc/reiser.h"
 #include "../../core/inc/directory.h"
+#include "../../core/inc/file.h"
 
 #define OPTIONS_COUNT 2
 
@@ -58,68 +59,17 @@ static void run_interactive(void) {
 		} else if (strcmp(command, "cp") == 0) {
 			puts("cp");
 		} else if (strcmp(command, "cat") == 0) {
-			puts("print");
+			char * arg = strtok(NULL, " ");
+			if (arg == NULL) {
+				puts("missing argument");
+				continue;
+			}
+			puts(get_file_by_name(arg, current_dir, inum));
 		} else {
 			puts("unknown command");
 		}
 	}
 }
-
-/**
- * receive current dir's dir and obj id
- * */
-/*static void print_working_dir(int32_t dir_id, int32_t obj_id){
-	struct item_wrapper * current = malloc(1);
-	unsigned int inum = get_dir(dir_id, obj_id, &current);
-	char * path = calloc(0,0);
-	int i = 0;
-	int32_t old_dir = 0;
-	int32_t old_obj = 0;
-
-	while (dir_id != 0) {
-		i++;
-		old_dir = dir_id;
-		old_obj = obj_id;
-		
-		change_dir(&current, &inum, "..", &dir_id, &obj_id);
-		for (int i = 0; i < inum; i++) {
-			if (current[i].dir_id == old_dir && current[i].obj_id == old_obj) {
-				path = realloc(path, strlen(path)+strlen(current[i].name)+2);
-				strcat(path, current[i].name);
-				strcat(path, "->");
-			}
-		}
-	}
-	puts(path);
-	free(current);
-	free(path);
-}*/
-
-/*static unsigned int change_dir(
-		struct item_wrapper ** cur,
-		unsigned int * inum,
-		char * new_dir,
-		int32_t * dir_id,
-		int32_t * obj_id) {
-
-	for (int i = 0; i < *inum; i++){
-		if (strcmp((*cur)[i].name, new_dir) == 0) {
-			*dir_id = (*cur)[i].dir_id;
-			*obj_id = (*cur)[i].obj_id;
-		}
-	}
-	if (*dir_id != 0) {
-		*inum = get_dir(*dir_id, *obj_id, cur);
-		return 0;
-	}
-	return 1;
-}*/
-
-/*static void list_directory(struct item_wrapper * items, unsigned int inum) {
-	for (int i = 0; i < inum; i++) {
-		printf("%s\n", items[i].name);
-	}
-}*/
 
 void disassembly_args(int argc, char * argv[]) {
 	const char * shortFlags = "lhd:m:";

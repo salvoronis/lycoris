@@ -53,7 +53,6 @@ struct __attribute__((packed)) block_header {
 	int16_t number_of_items;
 	int16_t free_space;
 	int16_t reserved;
-	//int32_t right_key[4];
 	struct reiser_key rkey;
 };
 struct __attribute__((packed)) key {
@@ -69,7 +68,6 @@ struct __attribute__((packed)) partition {
 	int16_t junk; //this is missing too, oh I'm so fucking love to read hex.
 };
 struct __attribute__((packed)) item_header {
-	//int32_t key[4];
 	struct reiser_key key;
 	int16_t count;
 	int16_t length;
@@ -91,7 +89,7 @@ struct __attribute__((packed)) stat_item_v1 {
 struct __attribute__((packed)) stat_item_v2 {
 	int16_t mode;
 	int16_t reserved;
-	int32_t num_links;
+	uint32_t num_links;
 	int64_t size;
 	int32_t UID;
 	int32_t GID;

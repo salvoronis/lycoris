@@ -18,7 +18,7 @@ $(SUBDIRS):
 mountfs:
 	sudo mount -t reiserfs -o loop $(FILEFS) $(MOUNTDIR)
 
-core_prt: list.o reiser.o linked_list.o directory.o file.o util.o
+core_prt: list.o reiser.o linked_list.o directory.o file.o util.o leaf.o
 
 list.o: ./lycoris/core/src/list.c
 	$(CC) -o ./lycoris/core/obj/$@ -c $^
