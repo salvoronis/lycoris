@@ -32,7 +32,7 @@ struct LinkedList * get_leaf_block_by_key(uint32_t d_id, uint32_t o_id) {
 			iter++;
 		}
 		uint32_t dtmp = keys[iter].dir_id;
-		while (iter < data->number_of_items && o_id > keys[iter].obj_id && keys[iter].dir_id == dtmp) {
+		while (iter < data->number_of_items && o_id >= keys[iter].obj_id && keys[iter].dir_id == dtmp) {
 			iter++;
 		}
 
