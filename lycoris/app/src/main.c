@@ -57,7 +57,20 @@ static void run_interactive(void) {
 					&cur_obj_id) == 0))
 				puts("change directory error");
 		} else if (strcmp(command, "cp") == 0) {
-			puts("cp");
+			char * arg = strtok(NULL, " ");
+			if (arg == NULL) {
+				puts("missing first argument");
+				continue;
+			}
+			char * arg2 = strtok(NULL, " ");
+			if (arg == NULL) {
+				puts("missing second argument");
+				continue;
+			}
+			FILE * cpto = fopen(arg2, "w+");
+			char * data = get_file_by_name(arg, current_dir, inum);
+			fwrite(data, strlen(data), 1, cpto);
+			fclose(cpto);
 		} else if (strcmp(command, "cat") == 0) {
 			char * arg = strtok(NULL, " ");
 			if (arg == NULL) {
