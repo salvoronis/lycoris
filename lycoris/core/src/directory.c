@@ -16,7 +16,6 @@ extern struct superblock * meta;
  * change arg items_in_dir and return number of dirs in item
  * */
 unsigned int get_dir(int32_t dir_id, int32_t obj_id, struct item_wrapper ** items_in_dir) {
-	//struct LinkedList * head = parseLeafNode(block_addr(meta->root_block,meta->blocksize));
 	struct LinkedList * head = get_leaf_block_by_key(dir_id, obj_id);
 
 	unsigned int items_count = 0;
@@ -36,10 +35,17 @@ unsigned int get_dir(int32_t dir_id, int32_t obj_id, struct item_wrapper ** item
 			dirs = (struct dir_header*) head->item;
 			*items_in_dir = realloc(*items_in_dir, 
 					head->header.count*sizeof(struct item_wrapper));
+			uint32_t floor = head->header.length;
 			for (int i = 0; i < head->header.count; i++) {
 				(*items_in_dir)[i].dir_id = dirs[i].dir_id;
 				(*items_in_dir)[i].obj_id = dirs[i].object_id;
-				(*items_in_dir)[i].name = (char*)(head->item+dirs[i].location);
+				(*items_in_dir)[i].name = 
+					(char*) calloc(floor-dirs[i].location+1,1);
+				memcpy(
+					(*items_in_dir)[i].name,
+					head->item+dirs[i].location,
+					floor-dirs[i].location);
+				floor = dirs[i].location;
 			}
 
 		}
