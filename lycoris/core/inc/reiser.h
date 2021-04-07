@@ -55,17 +55,10 @@ struct __attribute__((packed)) block_header {
 	int16_t reserved;
 	struct reiser_key rkey;
 };
-struct __attribute__((packed)) key {
-	int32_t block_number;
-	int32_t size;
-	int32_t reserved;
-	int32_t type; //this part is missing in the fucking documentation, but it in use in hex.
-};
 struct __attribute__((packed)) partition {
-	int16_t prt1;
-	int16_t shit; //this part is missing too. fuck this fs
-	int16_t prt2;
-	int16_t junk; //this is missing too, oh I'm so fucking love to read hex.
+	uint32_t pointer;
+	uint16_t size;
+	uint16_t reserved;
 };
 struct __attribute__((packed)) item_header {
 	struct reiser_key key;
@@ -115,4 +108,5 @@ int check_fs();
 void read_meta(char * path_to_fs);
 void print_meta(void);
 unsigned int get_dir(int32_t dir_id, int32_t obj_id, struct item_wrapper **);
+void print_root_leaf(uint32_t);
 #endif

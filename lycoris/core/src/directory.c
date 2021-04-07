@@ -6,6 +6,7 @@
 #include "../inc/linked_list.h"
 #include "../inc/util.h"
 #include "../inc/leaf.h"
+#include "../inc/btree.h"
 #include <string.h>
 
 extern struct superblock * meta;
@@ -15,7 +16,9 @@ extern struct superblock * meta;
  * change arg items_in_dir and return number of dirs in item
  * */
 unsigned int get_dir(int32_t dir_id, int32_t obj_id, struct item_wrapper ** items_in_dir) {
-	struct LinkedList * head = parseLeafNode(block_addr(meta->root_block,meta->blocksize));
+	//struct LinkedList * head = parseLeafNode(block_addr(meta->root_block,meta->blocksize));
+	struct LinkedList * head = get_leaf_block_by_key(dir_id, obj_id);
+
 	unsigned int items_count = 0;
 	while (head != NULL) {
 		enum Type key_type;

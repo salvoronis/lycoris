@@ -3,6 +3,7 @@
 #include "../inc/leaf.h"
 #include "../inc/util.h"
 #include "../inc/linked_list.h"
+#include "../inc/btree.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,7 +21,8 @@ char * get_file_by_name(char * name, struct item_wrapper * cur, uint32_t inum) {
 }
 
 char * get_file(uint32_t dir_id, uint32_t obj_id) {
-	struct LinkedList * head = parseLeafNode(block_addr(meta->root_block, meta->blocksize));
+	//struct LinkedList * head = parseLeafNode(block_addr(meta->root_block, meta->blocksize));
+	struct LinkedList * head = get_leaf_block_by_key(dir_id, obj_id);
 	struct LinkedList * tmp;
 	uint32_t offset = 0;
 	enum Type key_t;

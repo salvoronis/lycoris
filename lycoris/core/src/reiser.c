@@ -1,6 +1,7 @@
 #include "../inc/reiser.h"
 #include "../inc/linked_list.h"
 #include "../inc/util.h"
+#include "../inc/btree.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -45,28 +46,28 @@ void print_root_block(){
 		data->free_space
 		);
 
-	struct key * keys = malloc(sizeof(struct key) * (data->number_of_items));
-	fread(keys, sizeof(struct key), data->number_of_items, fs);
+	struct reiser_key * keys = malloc(sizeof(struct reiser_key)*(data->number_of_items));
+	fread(keys, sizeof(struct reiser_key), data->number_of_items, fs);
 	for (int i = 0; i < data->number_of_items; i++) {
 		printf(
-			"-->block num: %u\n"
-			"-->size: %u\n"
-			"-->reserved: %u\n"
+			"-->dir_id: %u\n"
+			"-->obj_id: %u\n"
+			"-->offset: %u\n"
 			"-->type: %u\n\n",
-			keys[i].block_number,
-			keys[i].size,
-			keys[i].reserved,
-			keys[i].type
+			keys[i].dir_id,
+			keys[i].obj_id,
+			keys[i].u.k_offset_v1.offset,
+			keys[i].u.k_offset_v1.type
 			);
 	}
 	struct partition * prts = malloc(sizeof(struct partition)*(data->number_of_items + 1));
 	fread(prts, sizeof(struct partition), data->number_of_items+1, fs);
 	for (int i = 0; i < data->number_of_items + 1; i++) {
 		printf(
-			"1 = %u\t"
-			"2 = %u\n",
-			prts[i].prt1,
-			prts[i].prt2
+			"pointer = %u\t"
+			"size = %u\n",
+			prts[i].pointer,
+			prts[i].size
 			);
 	}
 }
@@ -118,15 +119,17 @@ void get_directories(struct LinkedList * node){
 			dirs[i].state
 		);
 		#endif
-		printf("%s\n-------------\n",(char*)(node->item+dirs[i].location));
+		char * name_tmp = calloc(node->header.length+1, 1);
+		strcat(name_tmp, (char*)(node->item+dirs[i].location));
+		printf("%s\n-------------\n",name_tmp); //8 byte align! /TODO
 	}
 }
 
 /**
  * MUST BE DELETED
  * */
-void print_root_leaf() {
-	unsigned int root = block_addr(meta->root_block, meta->blocksize);
+void print_root_leaf(uint32_t block_num) {
+	unsigned int root = block_addr(block_num, meta->blocksize);
 	struct block_header * data = malloc(sizeof(struct block_header));
 	fseek(fs, root, SEEK_SET);
 	fread(data, sizeof(struct block_header), 1, fs);
@@ -256,6 +259,8 @@ void print_meta() {
 		meta->reserved,
 		meta->inode_generation
 	);
-	//print_root_block();
-	print_root_leaf();
+	get_leaf_block_by_key(52,57);
+	print_root_block();
+	//print_root_leaf(8211);
+	//print_root_leaf(8229);
 }
