@@ -8,12 +8,15 @@
 #include "../../core/inc/reiser.h"
 #include "../../core/inc/directory.h"
 #include "../../core/inc/file.h"
+#include "../inc/colors.h"
 
 #define OPTIONS_COUNT 2
 
 static void disassembly_args(int, char**);
 static void display_usage(void);
 static void run_interactive(void);
+static void change_output_color(char*);
+static void reset_output_color(void);
 
 typedef enum {false, true} Bool;
 
@@ -29,7 +32,9 @@ static void run_interactive(void) {
 	int32_t cur_obj_id = 2;
 	unsigned int inum = get_dir(cur_dir_id, cur_obj_id, &current_dir);
 	while (!stop_flag) {
+		change_output_color(GREEN);
 		printf("lycoris-> ");
+		reset_output_color();
 		fgets(cmd, sizeof(cmd), stdin);
 		for (int i = 0; i < sizeof(cmd); i++) {
 			if (cmd[i] == '\n'){
@@ -43,7 +48,9 @@ static void run_interactive(void) {
 		} else if (strcmp(command, "pwd") == 0) {
 			print_working_dir(cur_dir_id, cur_obj_id);
 		} else if (strcmp(command, "ls") == 0) {
+			change_output_color(CYAN);
 			list_directory(current_dir, inum);
+			reset_output_color();
 		} else if (strcmp(command, "cd") == 0) {
 			char * arg = strtok(NULL, " ");
 			if (arg == NULL) {
@@ -139,4 +146,12 @@ void display_usage() {
 				help_list[i].description
 				);
 	}
+}
+
+static void change_output_color(char * color) {
+	printf("%s",color);
+}
+
+static void reset_output_color() {
+	printf("\033[0m");
 }
