@@ -5,6 +5,7 @@
 #define pointer_offset(n, k) (24 + k * 16 + n * 8)
 #define item_headers_off(n) (24*(n+1))
 #include <stdint.h>
+#include "util.h"
 struct __attribute__((packed)) superblock {
 	int32_t block_count;
 	int32_t free_blocks;
@@ -103,6 +104,7 @@ struct item_wrapper {
 	uint32_t dir_id;
 	uint32_t obj_id;
 	char * name;
+	enum Type type;
 };
 int check_fs();
 void read_meta(char * path_to_fs);

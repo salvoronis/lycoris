@@ -74,6 +74,11 @@ static void run_interactive(void) {
 				puts("missing second argument");
 				continue;
 			}
+			//TODO copy(arg, arg2, current_dir, inum)
+			//в copy обернуть копирование файла и директории
+			//в директории скопировать все файлы (изи)
+			//а вот с директориями сложнее.
+			//удобнее делать вложенно сохраняя id нынешней директории
 			FILE * cpto = fopen(arg2, "w+");
 			char * data = get_file_by_name(arg, current_dir, inum);
 			fwrite(data, strlen(data), 1, cpto);

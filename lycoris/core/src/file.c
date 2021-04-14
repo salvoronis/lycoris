@@ -21,7 +21,6 @@ char * get_file_by_name(char * name, struct item_wrapper * cur, uint32_t inum) {
 }
 
 char * get_file(uint32_t dir_id, uint32_t obj_id) {
-	//struct LinkedList * head = parseLeafNode(block_addr(meta->root_block, meta->blocksize));
 	struct LinkedList * head = get_leaf_block_by_key(dir_id, obj_id);
 	struct LinkedList * tmp;
 	uint32_t offset = 0;
@@ -60,7 +59,6 @@ char * get_file(uint32_t dir_id, uint32_t obj_id) {
 				data = realloc(data, strlen(data) + tmp->header.length);
 				char * tmp_str = get_file_chunk(tmp);
 				strcat(data,tmp_str);
-				//free(tmp_str);
 			}
 			tmp = tmp->next;
 		}
