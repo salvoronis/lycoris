@@ -6,4 +6,5 @@
 char * get_file_by_name(char *, struct item_wrapper*, uint32_t);
 char * get_file(uint32_t,uint32_t);
 char * get_file_chunk(struct LinkedList * node);
+void copy(char *, char *, struct item_wrapper *, uint32_t);
 #endif

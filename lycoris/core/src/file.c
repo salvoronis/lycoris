@@ -11,9 +11,40 @@
 
 extern struct superblock * meta;
 
+void copy(char * from, char * to, struct item_wrapper * cur, uint32_t inum) {
+	for (uint32_t i = 0; i < inum; i++) {
+		if (strcmp(cur[i].name, from) == 0) {
+			struct item_header * tmp = get_item_by_ids(cur[i].dir_id, cur[i].obj_id);
+			enum Type type;
+			if (tmp->version == 0) {
+				type = get_keyv1_type(tmp->key.u.k_offset_v1.type);
+			} else
+				type = get_keyv2_type(tmp->key.u.k_offset_v2.offset);
+
+			if (type == Directory) {
+				//
+			} else if (type == Direct) {
+				FILE * cpto = fopen(to, "w+");
+				char * data = get_file(tmp->key.dir_id, tmp->key.obj_id);
+				fwrite(data, strlen(data), 1, cpto);
+				fclose(cpto);
+				return;
+			}
+		}
+	}
+}
+
 char * get_file_by_name(char * name, struct item_wrapper * cur, uint32_t inum) {
 	for (uint32_t i = 0; i < inum; i++) {
 		if (strcmp(cur[i].name, name) == 0) {
+			struct item_header * tmp = get_item_by_ids(cur[i].dir_id, cur[i].obj_id);
+			enum Type type;
+			if (tmp->version == 0) {
+				type = get_keyv1_type(tmp->key.u.k_offset_v1.type);
+			} else {
+				type = get_keyv2_type(tmp->key.u.k_offset_v2.offset);
+			}
+			printf("key type -> %d\n",type);
 			return get_file(cur[i].dir_id, cur[i].obj_id);
 		}
 	}
