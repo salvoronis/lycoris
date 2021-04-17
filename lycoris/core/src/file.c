@@ -73,13 +73,15 @@ char * get_file_by_name(char * name, struct item_wrapper * cur, uint32_t inum) {
 	for (uint32_t i = 0; i < inum; i++) {
 		if (strcmp(cur[i].name, name) == 0) {
 			struct item_header * tmp = get_item_by_ids(cur[i].dir_id, cur[i].obj_id);
+			if (tmp == NULL) {
+				return "lol it's null";
+			}
 			enum Type type;
 			if (tmp->version == 0) {
 				type = get_keyv1_type(tmp->key.u.k_offset_v1.type);
 			} else {
 				type = get_keyv2_type(tmp->key.u.k_offset_v2.offset);
 			}
-			printf("key type -> %d\n",type);
 			return get_file(cur[i].dir_id, cur[i].obj_id);
 		}
 	}
