@@ -80,12 +80,6 @@ static void run_interactive(void) {
 			//в директории скопировать все файлы (изи)
 			//а вот с директориями сложнее.
 			//удобнее делать вложенно сохраняя id нынешней директории
-			//
-			//
-			//FILE * cpto = fopen(arg2, "w+");
-			//char * data = get_file_by_name(arg, current_dir, inum);
-			//fwrite(data, strlen(data), 1, cpto);
-			//fclose(cpto);
 			copy(arg, arg2, current_dir, inum);
 		} else if (strcmp(command, "cat") == 0) {
 			char * arg = strtok(NULL, " ");

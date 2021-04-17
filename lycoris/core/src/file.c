@@ -4,10 +4,12 @@
 #include "../inc/util.h"
 #include "../inc/linked_list.h"
 #include "../inc/btree.h"
+#include "../inc/directory.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 
 extern struct superblock * meta;
 
@@ -22,7 +24,41 @@ void copy(char * from, char * to, struct item_wrapper * cur, uint32_t inum) {
 				type = get_keyv2_type(tmp->key.u.k_offset_v2.offset);
 
 			if (type == Directory) {
-				//
+				char * resDir = calloc(strlen(from) + strlen(to) + 1, 1);
+				strcat(resDir, to);
+				strcat(resDir, "/");
+				strcat(resDir, from);
+				struct stat st = {0};
+				int32_t cur_dir = 1;
+				int32_t cur_obj = 2;
+
+				struct item_wrapper * tmp = malloc(sizeof(struct item_wrapper) * inum);
+				memcpy(tmp, cur, sizeof(struct item_wrapper) * inum);
+				uint32_t inumtmp = inum;
+				if (stat(resDir, &st) == -1){
+					mkdir(resDir, 0700);
+					if ((change_dir(&tmp, &inumtmp, 
+							from, &cur_dir, &cur_obj) == 0)) {
+						for (uint32_t i = 0; i < inumtmp; i++)
+							if (strcmp(tmp[i].name, ".") != 0 &&
+							strcmp(tmp[i].name, "..") != 0){
+								char * newFile = calloc(
+									strlen(tmp[i].name) +
+									strlen(resDir) + 1, 1
+								);
+								strcat(newFile, resDir);
+								strcat(newFile, "/");
+								strcat(newFile, tmp[i].name);
+								puts(newFile);
+								copy(
+									tmp[i].name,
+									newFile,
+									tmp,
+									inumtmp
+								);
+							}
+					}
+				}
 			} else if (type == Direct) {
 				FILE * cpto = fopen(to, "w+");
 				char * data = get_file(tmp->key.dir_id, tmp->key.obj_id);
