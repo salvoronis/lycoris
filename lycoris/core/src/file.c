@@ -48,7 +48,6 @@ void copy(char * from, char * to, struct item_wrapper * cur, uint32_t inum) {
 								);
 								strcat(newFile, resDir);
 								strcat(newFile, tmp[i].name);
-								puts(newFile);
 								copy(
 									tmp[i].name,
 									newFile,
@@ -132,7 +131,6 @@ char * get_file(uint32_t dir_id, uint32_t obj_id) {
 		}
 	}
 	free(tmp);
-	//TODO make list_free func
 	return data;
 }
 

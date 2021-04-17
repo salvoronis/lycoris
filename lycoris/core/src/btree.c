@@ -27,25 +27,13 @@ struct LinkedList * get_leaf_block_by_key(uint32_t d_id, uint32_t o_id) {
 			malloc(sizeof(struct partition)*(data->number_of_items+1));
 		fread(prts, sizeof(struct partition), data->number_of_items+1, fs);
 
-
-		printf("want-> %d %d\n", d_id, o_id);
-		for (uint32_t i = 0; i < data->number_of_items; i++) {
-			printf("key -> %u %u %X\n",
-				keys[i].dir_id,keys[i].obj_id,keys[i].u.k_offset_v2.offset);
-		}
-
-		for (uint32_t i = 0; i <= data->number_of_items; i++) {
-			printf("prt -> %u %u\n",prts[i].pointer, prts[i].size);
-		}
-		
 		uint32_t iter = 0;
 		uint32_t ditmp = 0;
 		while (iter < data->number_of_items && d_id > keys[iter].dir_id) {
 			ditmp = keys[iter].dir_id;
 			iter++;
 		}
-		//uint32_t dtmp = keys[iter].dir_id;
-		printf("ditmp -> %u", ditmp);
+		
 		while (iter < data->number_of_items &&
 				o_id >= keys[iter].obj_id &&
 				keys[iter].dir_id == ditmp) {
@@ -54,7 +42,6 @@ struct LinkedList * get_leaf_block_by_key(uint32_t d_id, uint32_t o_id) {
 
 		root_bl = prts[iter].pointer;
 
-		printf("new root -> %u\n", root_bl);
 		root = block_addr(root_bl, meta->blocksize);
 		fseek(fs, root, SEEK_SET);
 		fread(data, sizeof(struct block_header), 1, fs);
@@ -101,11 +88,6 @@ struct LinkedList * parseLeafNode(uint32_t block_addr){
 
 struct item_header * get_item_by_ids(uint32_t dir, uint32_t obj) {
 	struct LinkedList * head = get_leaf_block_by_key(dir, obj);
-	//struct LinkedList * tmp = head;
-	//while (tmp != NULL){
-	//	printf("%u %u\n",tmp->header.key.dir_id, tmp->header.key.obj_id);
-	//	tmp = tmp->next;
-	//}
 	while (head != NULL) {
 		if (head->header.key.dir_id == dir &&
 		head->header.key.obj_id == obj) {
