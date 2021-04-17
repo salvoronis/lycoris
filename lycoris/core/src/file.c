@@ -24,15 +24,15 @@ void copy(char * from, char * to, struct item_wrapper * cur, uint32_t inum) {
 				type = get_keyv2_type(tmp->key.u.k_offset_v2.offset);
 
 			if (type == Directory) {
-				char * resDir = calloc(strlen(from) + strlen(to) + 1, 1);
+				char * resDir = calloc(strlen(to) + 2, 1);
 				strcat(resDir, to);
 				strcat(resDir, "/");
-				strcat(resDir, from);
 				struct stat st = {0};
 				int32_t cur_dir = 1;
 				int32_t cur_obj = 2;
 
-				struct item_wrapper * tmp = malloc(sizeof(struct item_wrapper) * inum);
+				struct item_wrapper * tmp = malloc(sizeof(struct item_wrapper) *
+						inum);
 				memcpy(tmp, cur, sizeof(struct item_wrapper) * inum);
 				uint32_t inumtmp = inum;
 				if (stat(resDir, &st) == -1){
@@ -44,10 +44,9 @@ void copy(char * from, char * to, struct item_wrapper * cur, uint32_t inum) {
 							strcmp(tmp[i].name, "..") != 0){
 								char * newFile = calloc(
 									strlen(tmp[i].name) +
-									strlen(resDir) + 1, 1
+									strlen(resDir) + 2, 1
 								);
 								strcat(newFile, resDir);
-								strcat(newFile, "/");
 								strcat(newFile, tmp[i].name);
 								puts(newFile);
 								copy(
