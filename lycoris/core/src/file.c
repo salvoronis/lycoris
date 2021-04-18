@@ -64,7 +64,7 @@ void copy(char * from, char * to, struct item_wrapper * cur, uint32_t inum) {
 				FILE * cpto = fopen(to, "w+");
 				struct reiser_key kes = tmp->key;
 				kes.u.k_offset_v2.offset = 0;
-				char * data = get_filen(kes);
+				char * data = get_file(kes);
 
 				fwrite(data, strlen(data), 1, cpto);
 				fclose(cpto);
@@ -92,13 +92,13 @@ char * get_file_by_name(char * name, struct item_wrapper * cur, uint32_t inum) {
 			}
 
 			skey.u.k_offset_v2.offset = 0;
-			return get_filen(skey);
+			return get_file(skey);
 		}
 	}
 	return NULL;
 }
 
-static uint16_t get_file_chunkkk(struct reiser_key skey, char * data) {
+static uint16_t get_file_chunk(struct reiser_key skey, char * data) {
 	struct LinkedList * head = get_leaf_block_by_key(skey);
 	while (head != NULL) {
 		enum Type type;
@@ -118,7 +118,7 @@ static uint16_t get_file_chunkkk(struct reiser_key skey, char * data) {
 	return 0;
 }
 
-char * get_filen(struct reiser_key skey) {
+char * get_file(struct reiser_key skey) {
 	struct LinkedList * head = get_leaf_block_by_key(skey);
 	struct LinkedList * tmp = head;
 	enum Type type;
@@ -145,7 +145,7 @@ char * get_filen(struct reiser_key skey) {
 			skey.u.k_offset_v2.offset = 1;
 
 			while (size != 0) {
-				uint64_t chunk_size = get_file_chunkkk(skey, data);
+				uint64_t chunk_size = get_file_chunk(skey, data);
 				skey.u.k_offset_v2.offset =
 					skey.u.k_offset_v2.offset + chunk_size;
 				size -= chunk_size;
@@ -156,56 +156,4 @@ char * get_filen(struct reiser_key skey) {
 		tmp = tmp->next;
 	}
 	return "hehehe";
-}
-
-char * get_file(struct reiser_key skey) {
-	struct LinkedList * head = get_leaf_block_by_key(skey);
-	struct LinkedList * tmp;
-	uint32_t offset = 0;
-	enum Type key_t;
-	tmp = head;
-	while (tmp != NULL) {
-		if (tmp->header.key.dir_id == skey.dir_id &&
-				tmp->header.key.obj_id == skey.obj_id) {
-			if (tmp->header.version == 0) {
-				if (tmp->header.key.u.k_offset_v1.offset == 0) {
-					offset = ((struct stat_item_v1*)head->item)->num_links;
-					break;
-				}
-			} else if (tmp->header.version == 1) {
-				if (get_keyv2_offset(tmp->header.key.u.k_offset_v2.offset)==0) {
-					offset = ((struct stat_item_v2*)tmp->item)->num_links;
-					break;
-				}
-			}
-		}
-		tmp = tmp->next;
-	}
-	char * data = calloc(0, 0);
-	for (uint64_t i = 1; i <= offset; i++){
-		tmp = head;
-		while (tmp != NULL) {
-			enum Type key_type;
-			if (tmp->header.version == 0) {
-				key_type =
-					get_keyv1_type(tmp->header.key.u.k_offset_v1.type);
-			} else 
-				key_type =
-					get_keyv2_type(tmp->header.key.u.k_offset_v2.offset);
-			if (key_type == Direct &&
-			tmp->header.key.dir_id == skey.dir_id &&
-			tmp->header.key.obj_id == skey.obj_id) {
-				data = realloc(data, strlen(data) + tmp->header.length);
-				char * tmp_str = get_file_chunk(tmp);
-				strcat(data,tmp_str);
-			}
-			tmp = tmp->next;
-		}
-	}
-	free(tmp);
-	return data;
-}
-
-char * get_file_chunk(struct LinkedList * node) {
-	return (char *)node->item;
 }

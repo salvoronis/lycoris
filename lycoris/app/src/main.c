@@ -1,14 +1,9 @@
 #include <getopt.h>
-#include <stdint.h>
-#include <stddef.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include "../../core/inc/functions.h"
-#include "../../core/inc/reiser.h"
 #include "../../core/inc/directory.h"
 #include "../../core/inc/file.h"
-#include "../../core/inc/btree.h"
 #include "../inc/colors.h"
 
 #define OPTIONS_COUNT 2
@@ -23,6 +18,12 @@ typedef enum {false, true} Bool;
 
 int main(int argc, char * argv[]) {
 	disassembly_args(argc, argv);
+}
+
+static void list_directory(struct item_wrapper * items, unsigned int inum) {
+	for (int i = 0; i < inum; i++) {
+		printf("%s\n", items[i].name);
+	}
 }
 
 static void run_interactive(void) {

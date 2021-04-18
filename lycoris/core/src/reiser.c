@@ -115,10 +115,4 @@ void print_meta() {
 		meta->reserved,
 		meta->inode_generation
 	);
-	struct reiser_key key;
-	key.dir_id = 4;
-	key.obj_id = 61;
-	key.u.k_offset_v2.offset = 0;
-	char * data = get_filen(key);
-	printf("%s",data);
 }
