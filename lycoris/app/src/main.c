@@ -75,11 +75,6 @@ static void run_interactive(void) {
 				puts("missing second argument");
 				continue;
 			}
-			//TODO copy(arg, arg2, current_dir, inum)
-			//в copy обернуть копирование файла и директории
-			//в директории скопировать все файлы (изи)
-			//а вот с директориями сложнее.
-			//удобнее делать вложенно сохраняя id нынешней директории
 			copy(arg, arg2, current_dir, inum);
 		} else if (strcmp(command, "cat") == 0) {
 			char * arg = strtok(NULL, " ");

@@ -3,6 +3,7 @@
 #include "../inc/linked_list.h"
 #include "../inc/util.h"
 #include "../inc/btree.h"
+#include "../inc/file.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -114,4 +115,10 @@ void print_meta() {
 		meta->reserved,
 		meta->inode_generation
 	);
+	struct reiser_key key;
+	key.dir_id = 4;
+	key.obj_id = 61;
+	key.u.k_offset_v2.offset = 0;
+	char * data = get_filen(key);
+	printf("%s",data);
 }

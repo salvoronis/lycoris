@@ -1,4 +1,5 @@
 #include "../inc/btree.h"
+#include "../inc/util.h"
 #include "../inc/reiser.h"
 #include "../inc/linked_list.h"
 #include <stdint.h>
@@ -8,11 +9,30 @@
 extern struct superblock * meta;
 extern FILE * fs;
 
+static uint32_t key_binsearch(struct reiser_key * keys,
+				int32_t left,
+				int32_t right,
+				struct reiser_key skey) {
+	if (right >= left) {
+		int32_t middle = (left + right) / 2;
+		if (cmp_keys(keys[middle], skey) == 0) {
+			return middle;
+		} else if (cmp_keys(keys[middle], skey) > 0) {
+			return key_binsearch(keys, left, middle - 1, skey);
+		}
+		return key_binsearch(keys, middle + 1, right, skey);
+	}
+	return left - 1;
+}
+
 struct LinkedList * get_leaf_block_by_key(struct reiser_key skey) {
 	uint32_t root_bl = meta->root_block;
 	uint32_t root = block_addr(root_bl, meta->blocksize);
 	struct block_header * data = malloc(sizeof(struct block_header));
 	struct LinkedList * result;
+	if (skey.u.k_offset_v2.offset == 0x50) {
+		skey.u.k_offset_v2.offset = 0;
+	}
 	fseek(fs, root, SEEK_SET);
 	fread(data, sizeof(struct block_header), 1, fs);
 
@@ -27,23 +47,7 @@ struct LinkedList * get_leaf_block_by_key(struct reiser_key skey) {
 			malloc(sizeof(struct partition)*(data->number_of_items+1));
 		fread(prts, sizeof(struct partition), data->number_of_items+1, fs);
 
-		uint32_t iter = 0;
-		uint32_t ditmp = 0;
-		while (iter < data->number_of_items &&
-				skey.dir_id > keys[iter].dir_id) {
-			ditmp = keys[iter].dir_id;
-			iter++;
-		}
-
-		while (iter < data->number_of_items &&
-				skey.obj_id > keys[iter].obj_id &&
-				keys[iter].dir_id == ditmp) {
-			iter++;
-		}
-
-		if (keys[iter].obj_id < skey.obj_id) {
-			iter++;
-		}
+		uint32_t iter = key_binsearch(keys, 0, data->number_of_items - 1, skey) + 1;
 
 		root_bl = prts[iter].pointer;
 
