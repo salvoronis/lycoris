@@ -1,4 +1,5 @@
 #include "../inc/reiser.h"
+#include "../inc/reiser_structures.h"
 #include "../inc/linked_list.h"
 #include "../inc/util.h"
 #include "../inc/btree.h"

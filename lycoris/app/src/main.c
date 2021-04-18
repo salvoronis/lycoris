@@ -29,9 +29,10 @@ static void run_interactive(void) {
 	Bool stop_flag = false;
 	char cmd[100];
 	struct item_wrapper * current_dir = malloc(1);
-	int32_t cur_dir_id = 1;
-	int32_t cur_obj_id = 2;
-	unsigned int inum = get_dir(cur_dir_id, cur_obj_id, &current_dir);
+	struct reiser_key skey;
+	skey.dir_id = 1;
+	skey.obj_id = 2;
+	unsigned int inum = get_dir(skey, &current_dir);
 	while (!stop_flag) {
 		change_output_color(GREEN);
 		printf("lycoris-> ");
@@ -47,7 +48,7 @@ static void run_interactive(void) {
 		if (strcmp(command, "exit") == 0 || strcmp(command, "q") == 0){
 			stop_flag = true;
 		} else if (strcmp(command, "pwd") == 0) {
-			print_working_dir(cur_dir_id, cur_obj_id);
+			print_working_dir(skey);
 		} else if (strcmp(command, "ls") == 0) {
 			change_output_color(CYAN);
 			list_directory(current_dir, inum);
@@ -61,8 +62,7 @@ static void run_interactive(void) {
 			if (!(change_dir(&current_dir,
 					&inum,
 					arg,
-					&cur_dir_id,
-					&cur_obj_id) == 0))
+					&skey) == 0))
 				puts("change directory error");
 		} else if (strcmp(command, "cp") == 0) {
 			char * arg = strtok(NULL, " ");

@@ -1,11 +1,10 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "../inc/reiser.h"
+#include "../inc/reiser_structures.h"
 #include "../inc/directory.h"
 #include "../inc/linked_list.h"
 #include "../inc/util.h"
-#include "../inc/leaf.h"
 #include "../inc/btree.h"
 #include <string.h>
 
@@ -15,8 +14,8 @@ extern struct superblock * meta;
  * receive dir and obj id and array of dir's headers
  * change arg items_in_dir and return number of dirs in item
  * */
-unsigned int get_dir(int32_t dir_id, int32_t obj_id, struct item_wrapper ** items_in_dir) {
-	struct LinkedList * head = get_leaf_block_by_key(dir_id, obj_id);
+unsigned int get_dir(struct reiser_key skey, struct item_wrapper ** items_in_dir) {
+	struct LinkedList * head = get_leaf_block_by_key(skey);
 
 	unsigned int items_count = 0;
 	while (head != NULL) {
@@ -27,8 +26,8 @@ unsigned int get_dir(int32_t dir_id, int32_t obj_id, struct item_wrapper ** item
 			key_type = get_keyv2_type(head->header.key.u.k_offset_v2.offset);
 
 		if (key_type == Directory &&
-		head->header.key.dir_id == dir_id &&
-		head->header.key.obj_id == obj_id) {
+		head->header.key.dir_id == skey.dir_id &&
+		head->header.key.obj_id == skey.obj_id) {
 			items_count = head->header.count;
 			struct dir_header * dirs =
 				malloc(head->header.count * sizeof(struct dir_header));
@@ -64,17 +63,16 @@ unsigned int change_dir(
 		struct item_wrapper ** cur,
 		unsigned int * inum,
 		char * new_dir,
-		int32_t * dir_id,
-		int32_t * obj_id) {
+		struct reiser_key * skey) {
 
 	for (int i = 0; i < *inum; i++){
 		if (strcmp((*cur)[i].name, new_dir) == 0) {
-			*dir_id = (*cur)[i].dir_id;
-			*obj_id = (*cur)[i].obj_id;
+			skey->dir_id = (*cur)[i].dir_id;
+			skey->obj_id = (*cur)[i].obj_id;
 		}
 	}
-	if (*dir_id != 0) {
-		*inum = get_dir(*dir_id, *obj_id, cur);
+	if (skey->dir_id != 0) {
+		*inum = get_dir(*skey, cur);
 		return 0;
 	}
 	return 1;
@@ -83,20 +81,20 @@ unsigned int change_dir(
 /**
  * receive current dir's dir and obj id
  * */
-void print_working_dir(int32_t dir_id, int32_t obj_id){
+void print_working_dir(struct reiser_key skey){
 	struct item_wrapper * current = malloc(1);
-	unsigned int inum = get_dir(dir_id, obj_id, &current);
+	unsigned int inum = get_dir(skey, &current);
 	char * path = calloc(0,0);
 	int i = 0;
 	int32_t old_dir = 0;
 	int32_t old_obj = 0;
 
-	while (dir_id != 0) {
+	while (skey.dir_id != 0) {
 		i++;
-		old_dir = dir_id;
-		old_obj = obj_id;
+		old_dir = skey.dir_id;
+		old_obj = skey.obj_id;
 		
-		change_dir(&current, &inum, "..", &dir_id, &obj_id);
+		change_dir(&current, &inum, "..", &skey);
 		for (int i = 0; i < inum; i++) {
 			if (current[i].dir_id == old_dir && current[i].obj_id == old_obj) {
 				path = realloc(path, strlen(path)+strlen(current[i].name)+2);

@@ -1,6 +1,6 @@
 #include "../inc/file.h"
 #include "../inc/reiser.h"
-#include "../inc/leaf.h"
+#include "../inc/reiser_structures.h"
 #include "../inc/util.h"
 #include "../inc/linked_list.h"
 #include "../inc/btree.h"
@@ -16,20 +16,23 @@ extern struct superblock * meta;
 void copy(char * from, char * to, struct item_wrapper * cur, uint32_t inum) {
 	for (uint32_t i = 0; i < inum; i++) {
 		if (strcmp(cur[i].name, from) == 0) {
-			struct item_header * tmp = get_item_by_ids(cur[i].dir_id, cur[i].obj_id);
+			struct reiser_key skey;
+			skey.dir_id = cur[i].dir_id;
+			skey.obj_id = cur[i].obj_id;
+			struct item_header * tmp = get_item_by_ids(skey);
 			enum Type type;
 			if (tmp->version == 0) {
 				type = get_keyv1_type(tmp->key.u.k_offset_v1.type);
 			} else
 				type = get_keyv2_type(tmp->key.u.k_offset_v2.offset);
-
 			if (type == Directory) {
 				char * resDir = calloc(strlen(to) + 2, 1);
 				strcat(resDir, to);
 				strcat(resDir, "/");
 				struct stat st = {0};
-				int32_t cur_dir = 1;
-				int32_t cur_obj = 2;
+				struct reiser_key dkey;
+				dkey.dir_id = 1;
+				dkey.obj_id = 2;
 
 				struct item_wrapper * tmp = malloc(sizeof(struct item_wrapper) *
 						inum);
@@ -38,7 +41,7 @@ void copy(char * from, char * to, struct item_wrapper * cur, uint32_t inum) {
 				if (stat(resDir, &st) == -1){
 					mkdir(resDir, 0700);
 					if ((change_dir(&tmp, &inumtmp, 
-							from, &cur_dir, &cur_obj) == 0)) {
+							from, &dkey) == 0)) {
 						for (uint32_t i = 0; i < inumtmp; i++)
 							if (strcmp(tmp[i].name, ".") != 0 &&
 							strcmp(tmp[i].name, "..") != 0){
@@ -59,7 +62,7 @@ void copy(char * from, char * to, struct item_wrapper * cur, uint32_t inum) {
 				}
 			} else if (type == Direct) {
 				FILE * cpto = fopen(to, "w+");
-				char * data = get_file(tmp->key.dir_id, tmp->key.obj_id);
+				char * data = get_file(tmp->key);
 				fwrite(data, strlen(data), 1, cpto);
 				fclose(cpto);
 				return;
@@ -71,7 +74,10 @@ void copy(char * from, char * to, struct item_wrapper * cur, uint32_t inum) {
 char * get_file_by_name(char * name, struct item_wrapper * cur, uint32_t inum) {
 	for (uint32_t i = 0; i < inum; i++) {
 		if (strcmp(cur[i].name, name) == 0) {
-			struct item_header * tmp = get_item_by_ids(cur[i].dir_id, cur[i].obj_id);
+			struct reiser_key skey;
+			skey.dir_id = cur[i].dir_id;
+			skey.obj_id = cur[i].obj_id;
+			struct item_header * tmp = get_item_by_ids(skey);
 			if (tmp == NULL) {
 				return "lol it's null";
 			}
@@ -81,20 +87,21 @@ char * get_file_by_name(char * name, struct item_wrapper * cur, uint32_t inum) {
 			} else {
 				type = get_keyv2_type(tmp->key.u.k_offset_v2.offset);
 			}
-			return get_file(cur[i].dir_id, cur[i].obj_id);
+			return get_file(skey);
 		}
 	}
-	return get_file(1, 2);
+	return NULL;
 }
 
-char * get_file(uint32_t dir_id, uint32_t obj_id) {
-	struct LinkedList * head = get_leaf_block_by_key(dir_id, obj_id);
+char * get_file(struct reiser_key skey) {
+	struct LinkedList * head = get_leaf_block_by_key(skey);
 	struct LinkedList * tmp;
 	uint32_t offset = 0;
 	enum Type key_t;
 	tmp = head;
 	while (tmp != NULL) {
-		if (tmp->header.key.dir_id == dir_id && tmp->header.key.obj_id == obj_id) {
+		if (tmp->header.key.dir_id == skey.dir_id &&
+				tmp->header.key.obj_id == skey.obj_id) {
 			if (tmp->header.version == 0) {
 				if (tmp->header.key.u.k_offset_v1.offset == 0) {
 					offset = ((struct stat_item_v1*)head->item)->num_links;
@@ -121,8 +128,8 @@ char * get_file(uint32_t dir_id, uint32_t obj_id) {
 				key_type =
 					get_keyv2_type(tmp->header.key.u.k_offset_v2.offset);
 			if (key_type == Direct &&
-			tmp->header.key.dir_id == dir_id &&
-			tmp->header.key.obj_id == obj_id) {
+			tmp->header.key.dir_id == skey.dir_id &&
+			tmp->header.key.obj_id == skey.obj_id) {
 				data = realloc(data, strlen(data) + tmp->header.length);
 				char * tmp_str = get_file_chunk(tmp);
 				strcat(data,tmp_str);

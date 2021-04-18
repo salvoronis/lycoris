@@ -8,7 +8,7 @@
 extern struct superblock * meta;
 extern FILE * fs;
 
-struct LinkedList * get_leaf_block_by_key(uint32_t d_id, uint32_t o_id) {
+struct LinkedList * get_leaf_block_by_key(struct reiser_key skey) {
 	uint32_t root_bl = meta->root_block;
 	uint32_t root = block_addr(root_bl, meta->blocksize);
 	struct block_header * data = malloc(sizeof(struct block_header));
@@ -29,14 +29,19 @@ struct LinkedList * get_leaf_block_by_key(uint32_t d_id, uint32_t o_id) {
 
 		uint32_t iter = 0;
 		uint32_t ditmp = 0;
-		while (iter < data->number_of_items && d_id > keys[iter].dir_id) {
+		while (iter < data->number_of_items &&
+				skey.dir_id > keys[iter].dir_id) {
 			ditmp = keys[iter].dir_id;
 			iter++;
 		}
-		
+
 		while (iter < data->number_of_items &&
-				o_id >= keys[iter].obj_id &&
+				skey.obj_id > keys[iter].obj_id &&
 				keys[iter].dir_id == ditmp) {
+			iter++;
+		}
+
+		if (keys[iter].obj_id < skey.obj_id) {
 			iter++;
 		}
 
@@ -86,11 +91,11 @@ struct LinkedList * parseLeafNode(uint32_t block_addr){
 	return head;
 }
 
-struct item_header * get_item_by_ids(uint32_t dir, uint32_t obj) {
-	struct LinkedList * head = get_leaf_block_by_key(dir, obj);
+struct item_header * get_item_by_ids(struct reiser_key skey) {
+	struct LinkedList * head = get_leaf_block_by_key(skey);
 	while (head != NULL) {
-		if (head->header.key.dir_id == dir &&
-		head->header.key.obj_id == obj) {
+		if (head->header.key.dir_id == skey.dir_id &&
+		head->header.key.obj_id == skey.obj_id) {
 			return &(head->header);
 		}
 		head = head->next;
