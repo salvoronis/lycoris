@@ -12,7 +12,7 @@ struct item_wrapper {
 	char * name;
 	enum Type type;
 };
-int check_fs();
+int check_fs(void);
 void read_meta(char * path_to_fs);
 void print_meta(void);
 void print_root_leaf(uint32_t);

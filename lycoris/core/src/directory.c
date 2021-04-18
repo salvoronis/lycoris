@@ -53,12 +53,6 @@ unsigned int get_dir(struct reiser_key skey, struct item_wrapper ** items_in_dir
 	return items_count;
 }
 
-void list_directory(struct item_wrapper * items, unsigned int inum) {
-	for (int i = 0; i < inum; i++) {
-		printf("%s\n", items[i].name);
-	}
-}
-
 unsigned int change_dir(
 		struct item_wrapper ** cur,
 		unsigned int * inum,

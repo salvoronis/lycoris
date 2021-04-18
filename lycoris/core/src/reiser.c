@@ -34,7 +34,7 @@ void read_meta(char *path_to_fs) {
 /**
  * wrapper function to get item type
  * */
-static enum Item_type get_item_type(int16_t mode) {
+static enum Item_type get_item_type(uint16_t mode) {
 	uint16_t mask = 0xF000;
 	uint16_t value = mode & mask;
 	switch (value) {
@@ -60,7 +60,7 @@ static enum Item_type get_item_type(int16_t mode) {
 /**
  * Compare magic field with expected value
  * */
-int check_fs() {
+int check_fs(void) {
 	return strcmp("ReIsEr2Fs", (char*)meta->magic_string) == 0? 1:0;
 }
 
