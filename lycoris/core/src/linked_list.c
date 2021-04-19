@@ -1,7 +1,4 @@
 #include "../inc/linked_list.h"
-#include "../inc/reiser.h"
-#include <stdio.h>
-#include <stdlib.h>
 
 void push(struct LinkedList ** head, struct item_header header, void * item, size_t size) {
 	struct LinkedList * new_node = (struct LinkedList*) malloc(sizeof(struct LinkedList));

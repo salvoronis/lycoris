@@ -1,7 +1,4 @@
 #include "../inc/util.h"
-#include "../inc/reiser_structures.h"
-#include <stdint.h>
-#include <stdio.h>
 
 uint64_t align_to_8(uint64_t x) {
 	return (x % 8 > 0)? ((x/8)+1)*8 : x;

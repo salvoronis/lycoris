@@ -1,10 +1,3 @@
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include "../inc/reiser_structures.h"
-#include "../inc/directory.h"
-#include "../inc/linked_list.h"
-#include "../inc/util.h"
 #include "../inc/btree.h"
 #include <string.h>
 
@@ -53,6 +46,10 @@ unsigned int get_dir(struct reiser_key skey, struct item_wrapper ** items_in_dir
 	return items_count;
 }
 
+/**
+ * change current item_wrapper, key and inum to new directory,
+ * pointed by new_dir name
+ * */
 unsigned int change_dir(
 		struct item_wrapper ** cur,
 		unsigned int * inum,
@@ -73,9 +70,10 @@ unsigned int change_dir(
 }
 
 /**
- * receive current dir's dir and obj id
+ * receive current dir's key
+ * produce rath to received key
  * */
-void print_working_dir(struct reiser_key skey){
+char * print_working_dir(struct reiser_key skey){
 	struct item_wrapper * current = malloc(1);
 	unsigned int inum = get_dir(skey, &current);
 	char * path = calloc(0,0);
@@ -97,7 +95,7 @@ void print_working_dir(struct reiser_key skey){
 			}
 		}
 	}
-	puts(path);
+	return path;
 	free(current);
 	free(path);
 }

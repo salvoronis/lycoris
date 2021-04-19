@@ -6,7 +6,7 @@
 #include "../../core/inc/file.h"
 #include "../inc/colors.h"
 
-#define OPTIONS_COUNT 2
+#define OPTIONS_COUNT 4
 
 static void disassembly_args(int, char**);
 static void display_usage(void);
@@ -49,7 +49,10 @@ static void run_interactive(void) {
 		if (strcmp(command, "exit") == 0 || strcmp(command, "q") == 0){
 			stop_flag = true;
 		} else if (strcmp(command, "pwd") == 0) {
-			print_working_dir(skey);
+			change_output_color(BLUE);
+			char * path = print_working_dir(skey);
+			puts(path);
+			reset_output_color();
 		} else if (strcmp(command, "ls") == 0) {
 			change_output_color(CYAN);
 			list_directory(current_dir, inum);
@@ -135,9 +138,15 @@ void display_usage() {
 	struct help help_list[] = {
 		{0, 'l', "list", "shows list of devices and partitions."},
 		{0, 'h', "help", "show this message."},
+		{0, 'd', "device", "start interactive mode with choosen device"},
+		{0, 'm', "meta", "prints superblock of choosen device"},
 	};
 	for (int16_t i; i < OPTIONS_COUNT; i++) {
-		printf("%s:\n\trequired: %d\n\tshort name: %c\n\tlong name: %s\n\tdescription: %s\n",
+		printf(	"%s:\n"
+			"\trequired: %d\n"
+			"\tshort name: %c\n"
+			"\tlong name: %s\n"
+			"\tdescription: %s\n",
 				help_list[i].longF,
 				help_list[i].require,
 				help_list[i].shortF,

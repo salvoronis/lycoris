@@ -1,10 +1,5 @@
 #include "../inc/btree.h"
-#include "../inc/util.h"
-#include "../inc/reiser.h"
-#include "../inc/linked_list.h"
-#include <stdint.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 extern struct superblock * meta;
 extern FILE * fs;
