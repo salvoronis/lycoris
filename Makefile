@@ -48,3 +48,7 @@ create_fs: $(FILEFS)
 	touch $(FILEFS)
 	sudo dd if=/dev/zero of=$(FILEFS) bs=1M count=64
 	make mountfs
+
+lyjs: ./lycoris/js/cppbindings/bindings.cpp
+	g++ -o lycoris/js/cppbindings/obj/test.o -c lycoris/js/cppbindings/bindings.cpp -lstdc++
+	g++ -o build/test lycoris/core/obj/*.o lycoris/js/cppbindings/obj/test.o
