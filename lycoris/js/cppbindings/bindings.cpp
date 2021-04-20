@@ -1,7 +1,6 @@
 #include <cstddef>
 #include <cstdio>
 #include <iostream>
-//#include <string>
 #include <cstring>
 #include <vector>
 #include "../../core/inc/reiser_structures.h"
@@ -16,6 +15,10 @@ extern "C" {
 			unsigned int *, char *, struct reiser_key *);
 	char * get_file_by_name(char *, struct item_wrapper *, std::uint32_t);
 	void copy(char *, char *, struct item_wrapper *, std::uint32_t);
+	void list_devises(void);
+	void read_meta(char *);
+	int check_fs(void);
+	void print_meta(void);
 }
 
 struct item_wrapper {
@@ -31,8 +34,7 @@ static void list_directory(struct item_wrapper * items, std::uint32_t inum) {
 	}
 }
 
-static void run_interactive(void) {
-	read_meta((char *)"./van.fs");
+static void run_interactive() {
 	bool stop_flag = false;
 	char cmd[100];
 	struct item_wrapper * current_dir = (struct item_wrapper *)malloc(1);
@@ -54,29 +56,29 @@ static void run_interactive(void) {
 		} else if (strcmp(command, "cd") == 0) {
 			char * arg = strtok(NULL, " ");
 			if (arg == NULL) {
-				puts("missing argument");
+				puts("Missing argument");
 				continue;
 			}
 			if (!(change_dir(&current_dir, &inum, arg, &skey) == 0)) {
-				puts("change directory error");
+				puts("Change directory error");
 				continue;
 			}
 		} else if (strcmp(command, "cp") == 0) {
 			char * arg = strtok(NULL, " ");
 			if (arg == NULL) {
-				puts("missing first argument");
+				puts("Missing first argument");
 				continue;
 			}
 			char * arg2 = strtok(NULL, " ");
 			if (arg2 == NULL) {
-				puts("missing second argument");
+				puts("Missing second argument");
 				continue;
 			}
 			copy(arg, arg2, current_dir, inum);
 		} else if (strcmp(command, "cat") == 0) {
 			char * arg = strtok(NULL, " ");
 			if (arg == NULL) {
-				puts("missing argument");
+				puts("Missing argument");
 				continue;
 			}
 			puts(get_file_by_name(arg, current_dir, inum));
@@ -86,6 +88,24 @@ static void run_interactive(void) {
 	}
 }
 
+void initLycoris(char * fs) {
+	read_meta(fs);
+}
+
+void get_list_devices(void) {
+	list_devises();
+}
+
+int checkMagic(void) {
+	return check_fs();
+}
+
+void printMeta(void) {
+	print_meta();
+}
+
 int main() {
+	initLycoris((char*)"./van.fs");
 	run_interactive();
+	list_devises();
 }
