@@ -1,0 +1,17 @@
+{
+  "name": "lycorisjs",
+  "version": "1.0.0",
+  "description": "i H8 js",
+  "main": "lycoris.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "install": "node-gyp rebuild"
+  },
+  "author": "salvoronis",
+  "license": "ISC",
+  "gypfile": true,
+  "dependencies": {
+    "node-addon-api": "^3.1.0",
+    "node-gyp": "^8.0.0"
+  }
+}

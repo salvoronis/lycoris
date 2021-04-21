@@ -3,3 +3,5 @@ van.fs
 build/*
 *.txt
 *.so
+lycoris/js/node_modules
+lycoris/js/build
