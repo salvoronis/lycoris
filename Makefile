@@ -1,6 +1,6 @@
 FILEFS = van.fs
 MOUNTDIR = /mnt/spo
-SUBDIRS = lycoris/app lycoris/core lycoris/app/obj lycoris/app/inc lycoris/app/src lycoris/core/obj core/inc lycoris/core/src build
+SUBDIRS = lycoris/app lycoris/core lycoris/app/obj lycoris/app/inc lycoris/app/src lycoris/core/obj core/inc lycoris/core/src build lycoris/js lycoris/js/cppbindings
 CC = gcc
 
 all: core_prt app_prt
