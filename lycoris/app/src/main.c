@@ -106,7 +106,7 @@ void disassembly_args(int argc, char * argv[]) {
 	while ((rez = getopt_long(argc, argv, shortFlags, longFlags, &longid)) != -1) {
 	switch (rez) {
 		case 'l':
-			list_devises();
+			puts(list_devises());
 			break;
 		case 'h':
 			display_usage();
@@ -121,7 +121,7 @@ void disassembly_args(int argc, char * argv[]) {
 			break;
 		case 'm':
 			read_meta(optarg);
-			print_meta();
+			puts(print_meta());
 			break;
 	}
 	}

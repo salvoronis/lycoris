@@ -4,37 +4,41 @@
 #include <stdlib.h>
 #include <string.h>
 
-static void partitions_list(char * device_name);
+static void partitions_list(char * device_name, char * output);
 static char * get_loc(char * device);
 
-void list_devises() {
+char * list_devises() {
+	char * output = calloc(2000, 1);
 	DIR *devices = opendir("/sys/block");
 	struct dirent *entry;
 	char * where;
-	get_loc("nvme0n1p5");
 	if (!devices) {
 		perror("Can not open /sys/block.");
 		exit(1);
 	}
-	puts("list of devices:\n.");
+	//puts("list of devices:\n.");
+	strcat(output, "List of devices:\n.");
 	while ( (entry = readdir(devices)) != NULL ) {
 		if (strcmp(entry->d_name,".") == 0 || strcmp(entry->d_name,"..") == 0)
 			continue;
 
-		printf("├── %s", entry->d_name);
+		strcat(output, "├── ");
+		strcat(output, entry->d_name);
 
 		if ( (where = get_loc(entry->d_name)) != NULL) {
-			printf("\t\t%s",where);
+			strcat(output, "\t\t");
+			strcat(output, where);
 		}
 
-		puts("");
+		strcat(output, "\n");
 
-		partitions_list(entry->d_name);
+		partitions_list(entry->d_name, output);
 	}
 	closedir(devices);
+	return output;
 }
 
-void partitions_list(char * device_name) {
+void partitions_list(char * device_name, char * output) {
 	DIR *partition_dir = opendir(concat("/sys/block/", device_name));
 	struct dirent *entry;
 	char * where;
@@ -44,21 +48,28 @@ void partitions_list(char * device_name) {
 	}
 	while ( (entry = readdir(partition_dir)) != NULL ) {
 		if (strstr(entry->d_name, device_name) != NULL) {
-			printf("│   ├── %s", entry->d_name);
+			strcat(output, "│   ├── ");
+			strcat(output, entry->d_name);
 			if ( (where = get_loc(entry->d_name)) != NULL) {
-				printf("\t%s",where);
+				strcat(output, "\t");
+				strcat(output, where);
 			}
-			puts("");
+			strcat(output, "\n");
 		}
 	}
 	closedir(partition_dir);
 }
 
 char * concat(char *s1, char *s2) {
-	char *result = malloc(strlen(s1) + strlen(s2) + 1);
+	char *result = calloc(strlen(s1) + strlen(s2) + 1, 1);
 	strcpy(result, s1);
 	strcat(result, s2);
 	return result;
+}
+
+void better_concat(char * s1, char * s2) {
+	s1 = realloc(s1, strlen(s1) + strlen(s2) + 1);
+	strcat(s1, s2);
 }
 
 static char * get_loc(char * device) {

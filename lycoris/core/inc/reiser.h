@@ -14,6 +14,6 @@ struct item_wrapper {
 };
 int check_fs(void);
 void read_meta(char * path_to_fs);
-void print_meta(void);
+char * print_meta(void);
 void print_root_leaf(uint32_t);
 #endif

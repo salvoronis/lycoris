@@ -1,6 +1,7 @@
 #include "../inc/reiser.h"
 #include "../inc/file.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define DEBUG
@@ -61,8 +62,9 @@ int check_fs(void) {
 /**
  * prints superblock's fields
  * */
-void print_meta() {
-	printf(
+char * print_meta() {
+	char * output = malloc(1000);
+	sprintf(output,
 		"Meta data\n"
 		"\t-->Block count: %d\n"
 		"\t-->Free blocks: %d\n"
@@ -109,4 +111,5 @@ void print_meta() {
 		meta->reserved,
 		meta->inode_generation
 	);
+	return output;
 }

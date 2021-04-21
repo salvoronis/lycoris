@@ -15,10 +15,10 @@ extern "C" {
 			unsigned int *, char *, struct reiser_key *);
 	char * get_file_by_name(char *, struct item_wrapper *, std::uint32_t);
 	void copy(char *, char *, struct item_wrapper *, std::uint32_t);
-	void list_devises(void);
+	char * list_devises(void);
 	void read_meta(char *);
 	int check_fs(void);
-	void print_meta(void);
+	char * print_meta(void);
 }
 
 struct item_wrapper {
@@ -92,20 +92,14 @@ void initLycoris(char * fs) {
 	read_meta(fs);
 }
 
-void get_list_devices(void) {
-	list_devises();
+char * get_list_devices(void) {
+	return list_devises();
 }
 
 int checkMagic(void) {
 	return check_fs();
 }
 
-void printMeta(void) {
-	print_meta();
-}
-
-int main() {
-	initLycoris((char*)"./van.fs");
-	run_interactive();
-	list_devises();
+char * printMeta(void) {
+	return print_meta();
 }
