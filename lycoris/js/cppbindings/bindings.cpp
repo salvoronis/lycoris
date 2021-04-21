@@ -108,11 +108,16 @@ Napi::String printMeta(const Napi::CallbackInfo &info) {
 	return meta;
 }
 
+Napi::String listDevises(const Napi::CallbackInfo &info) {
+	Napi::String list = Napi::String::New(info.Env(), list_devises());
+}
+
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
 	exports.Set(Napi::String::New(env, "checkMagic"), Napi::Function::New(env, checkMagic));
 	exports.Set(Napi::String::New(env, "printMeta"), Napi::Function::New(env, printMeta));
 	exports.Set(Napi::String::New(env, "initLycoris"), Napi::Function::New(env, initLycoris));
 	exports.Set(Napi::String::New(env, "runInteractive"), Napi::Function::New(env, runInteractive));
+	exports.Set(Napi::String::New(env, "listDevises"), Napi::Function::New(env, listDevises));
 	return exports;
 }
 
