@@ -81,15 +81,43 @@ function printHelp() {
 }
 
 function test(){
-    //console.log(lycorisLib.get_some_struct())
-    //console.log(lycorisLib.changeSomeShit({
-    //    dir_id:1,obj_id:2,name:"shit",type:123
-    //}))
-    lycorisLib.initWrapper(4)
-    //lycorisLib.toItemWrapper(1,2,"jopa", 1, 0)
+    /*lycorisLib.initWrapper(4)
     for (var i = 0; i < 5; i++) {
-        lycorisLib.toItemWrapper(1,2,"jopa", 1, i)
+        lycorisLib.toItemWrapper(1,2,"anime", 1, i)
+    }*/
+    lycorisLib.initLycoris(process.argv[3])
+    if (lycorisLib.checkMagic() == 1){
+        var napiArray = [{
+            dir_id: 1,
+            obj_id: 2,
+            namee: "hate"
+        }, {
+            dir_id: 2,
+            obj_id: 3,
+            namee: "fuck"
+        }, {
+            dir_id: 2,
+            obj_id: 3,
+            namee: "fuck"
+        }, {
+            dir_id: 2,
+            obj_id: 3,
+            namee: "fuck"
+        }, {
+            dir_id: 2,
+            obj_id: 3,
+            namee: "fuck"
+        }]
+        var skey = {dir_id: 1, obj_id: 2}
+
+        var dir = lycorisLib.getDir(skey, napiArray)
+        //console.log(dir)
+        //console.log(lycorisLib.printWorkingDir(skey))
+        var inum = dir.inum
+        var item_wrapper = dir.item_wrapper
+        console.log(lycorisLib.changeDir(item_wrapper, inum, "lycoris", skey))
     }
+    //lycorisLib.fucking_test_shit(napiArray)
 }
 
 function runInteractive(){
