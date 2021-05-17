@@ -115,7 +115,15 @@ function test(){
         //console.log(lycorisLib.printWorkingDir(skey))
         var inum = dir.inum
         var item_wrapper = dir.item_wrapper
-        console.log(lycorisLib.changeDir(item_wrapper, inum, "lycoris", skey))
+        
+
+        var dir2 = lycorisLib.changeDir(item_wrapper, inum, "lycoris", skey)
+        skey = dir2.skey
+        inum = dir2.inum
+        item_wrapper = dir2.item_wrapper
+
+        lycorisLib.copy("lycoris.txt", "/home/salvoroni/animee", item_wrapper, inum)
+        console.log(lycorisLib.getFileByName("lycoris.txt", item_wrapper, inum))
     }
     //lycorisLib.fucking_test_shit(napiArray)
 }
