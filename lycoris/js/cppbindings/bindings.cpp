@@ -176,7 +176,6 @@ Object get_dir_wrapper(const CallbackInfo &info) {
 				(std::uint32_t)tmp.Get("dir_id").ToNumber(),
 				(std::uint32_t)tmp.Get("obj_id").ToNumber(),
 				&((std::string)tmp.Get("namee").ToString())[0]
-				//(Type)((std::uint32_t)tmp.Get("type").ToNumber())
 			};
 		}
 
@@ -192,8 +191,6 @@ Object get_dir_wrapper(const CallbackInfo &info) {
 			obj.Set("dir_id", i_w[i].dir_id);
 			obj.Set("obj_id", i_w[i].obj_id);
 			obj.Set("namee", i_w[i].name);
-			//obj.Set("type", (uint32_t)i_w[i].type);
-			//cout << "shit > " << i_w[i].type << endl;
 			ret_items[i] = obj;
 		}
 		ret_tmp.Set("item_wrapper", ret_items);
@@ -237,7 +234,6 @@ Napi::String printMeta(const Napi::CallbackInfo &info) {
 Napi::String listDevises(const Napi::CallbackInfo &info) {
 	Napi::String list = Napi::String::New(info.Env(), list_devises());
 }
-
 
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
 	exports.Set(Napi::String::New(env, "checkMagic"), Napi::Function::New(env, checkMagic));
